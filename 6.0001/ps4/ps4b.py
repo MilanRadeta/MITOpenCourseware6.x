@@ -302,4 +302,6 @@ if __name__ == '__main__':
         print('Actual Output:', actual)
         exit(-1)
 
-    # TODO: best shift value and unencrypted story
+    story = get_story_string()
+    ciphertext = CiphertextMessage(story)
+    print(ciphertext.decrypt_message())
