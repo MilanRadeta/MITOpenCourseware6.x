@@ -168,7 +168,24 @@ class EncryptedSubMessage(SubMessage):
 
         Hint: use your function from Part 4A
         '''
-        pass  # delete this line and replace with your code here
+        perms = get_permutations(VOWELS_LOWER)
+        best_message = self.get_message_text()
+        max_words = 0
+
+        for perm in perms:
+            words_count = 0
+            transpose_dict = self.build_transpose_dict(perm)
+            decrypted_message = self.apply_transpose(transpose_dict)
+
+            for word in decrypted_message.split():
+                if is_word(self.valid_words, word):
+                    words_count += 1
+
+            if words_count > max_words:
+                max_words = words_count
+                best_message = decrypted_message
+
+        return best_message
 
 
 if __name__ == '__main__':
