@@ -3,7 +3,7 @@
 # Collaborators:
 # Time:
 
-import feedparser
+import requests
 import string
 import time
 import threading
@@ -11,6 +11,7 @@ from project_util import translate_html, is_sublist
 from mtTkinter import *
 from datetime import datetime
 import pytz
+import xml.etree.ElementTree as ET
 
 
 # -----------------------------------------------------------------------
@@ -21,28 +22,35 @@ import pytz
 # Do not change this code
 # ======================
 
+def build_item_dict(item):
+    result = {}
+    keys = ['guid', 'title', 'link', 'description', 'pubDate']
+    for key in keys:
+        elem = item.find(key)
+        result[key] = elem.text if elem is not None else ''
+    return result
+
+
 def process(url):
     """
     Fetches news items from the rss url and parses them.
     Returns a list of NewsStory-s.
     """
-    feed = feedparser.parse(url)
-    entries = feed.entries
+    response = requests.get(url)
+    root = ET.fromstring(response.content)
     ret = []
-    for entry in entries:
-        guid = entry.guid
-        title = translate_html(entry.title)
-        link = entry.link
-        description = translate_html(entry.description)
-        pubdate = translate_html(entry.published)
+    for entry in root.findall('channel/item'):
+        dict = build_item_dict(entry)
+        guid = dict['guid']
+        title = translate_html(dict['title'])
+        link = dict['link']
+        description = translate_html(dict['description'])
+        pubdate = translate_html(dict['pubDate'])
 
         try:
-            pubdate = datetime.strptime(pubdate, "%a, %d %b %Y %H:%M:%S %Z")
-            pubdate.replace(tzinfo=pytz.timezone("GMT"))
-          #  pubdate = pubdate.astimezone(pytz.timezone('EST'))
-          #  pubdate.replace(tzinfo=None)
+            pubdate = datetime.strptime(pubdate, "%Y-%m-%dT%H:%M:%S%z")
         except ValueError:
-            pubdate = datetime.strptime(pubdate, "%a, %d %b %Y %H:%M:%S %z")
+            pubdate = datetime.strptime(pubdate, "%a, %d %b %Y %H:%M:%S %Z")
 
         newsStory = NewsStory(guid, title, description, link, pubdate)
         ret.append(newsStory)
