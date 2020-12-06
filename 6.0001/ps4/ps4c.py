@@ -120,7 +120,7 @@ class SubMessage(object):
         for letter in string.ascii_letters:
             result[letter] = letter
 
-        for i in range(vowels_permutation):
+        for i in range(len(vowels_permutation)):
             result[VOWELS_LOWER[i]] = vowels_permutation[i].lower()
             result[VOWELS_UPPER[i]] = vowels_permutation[i].upper()
 
@@ -191,14 +191,31 @@ class EncryptedSubMessage(SubMessage):
 if __name__ == '__main__':
 
     # Example test case
-    message = SubMessage("Hello World!")
-    permutation = "eaiuo"
-    enc_dict = message.build_transpose_dict(permutation)
-    print("Original message:", message.get_message_text(),
-          "Permutation:", permutation)
-    print("Expected encryption:", "Hallu Wurld!")
-    print("Actual encryption:", message.apply_transpose(enc_dict))
-    enc_message = EncryptedSubMessage(message.apply_transpose(enc_dict))
-    print("Decrypted message:", enc_message.decrypt_message())
 
-    # TODO: WRITE YOUR TEST CASES HERE
+    test_data = [
+        ('Hello World!', 'eaiuo', 'Hallu Wurld!'),
+        ('Jangle Fever!', 'aoieu', 'Janglo Fovor!'),
+    ]
+
+    for message, permutation, expected in test_data:
+
+        message = SubMessage(message)
+        enc_dict = message.build_transpose_dict(permutation)
+
+        enc_message_text = message.apply_transpose(enc_dict)
+        if expected != enc_message_text:
+            print('FAILURE')
+            print("Original message:", message.get_message_text())
+            print("Permutation:", permutation)
+            print('Expected Output: ', expected)
+            print('Actual Output:', enc_message_text)
+            exit(-1)
+
+        enc_message = EncryptedSubMessage(enc_message_text)
+        decrypted_message = enc_message.decrypt_message()
+        if message.get_message_text() != decrypted_message:
+            print('FAILURE')
+            print("Encrypted message:", enc_message_text)
+            print('Expected Output: ', message.get_message_text())
+            print('Actual Output:', decrypted_message)
+            exit(-1)
