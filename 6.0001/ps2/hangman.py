@@ -105,7 +105,7 @@ def get_score(guesses_remaining, secret_word, letters_guessed):
     return guesses_remaining * len([l for l in letters_guessed if l in secret_word])
 
 
-def hangman(secret_word):
+def hangman(secret_word, support_hints=False):
     '''
     secret_word: string, the secret word to guess.
 
@@ -144,6 +144,9 @@ def hangman(secret_word):
         print(f'You have {guesses_remaining} guesses left')
         print(f'Available letters: {available_letters}')
         letter = input('Please guess a letter: ').lower()
+        if support_hints and letter == '*':
+            show_possible_matches(guessed_word)
+            continue
         if (len(letter) != 1 or not letter.isalpha()):
             warnings_remaining, guesses_remaining = update_warnings_and_guesses(
                 warnings_remaining, guesses_remaining)
@@ -191,8 +194,13 @@ def match_with_gaps(my_word, other_word):
         _ , and my_word and other_word are of the same length;
         False otherwise:
     '''
-    # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    my_word = my_word.replace(' ', '')
+    if len(my_word) != len(other_word):
+        return False
+    for i in range(len(my_word)):
+        if my_word[i] not in ('_', other_word[i]):
+            return False
+    return True
 
 
 def show_possible_matches(my_word):
@@ -205,8 +213,10 @@ def show_possible_matches(my_word):
              that has already been revealed.
 
     '''
-    # FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    for word in wordlist:
+        if match_with_gaps(my_word, word):
+            print(word, end=' ')
+    print()
 
 
 def hangman_with_hints(secret_word):
@@ -236,7 +246,7 @@ def hangman_with_hints(secret_word):
 
     Follows the other limitations detailed in the problem write-up.
     '''
-    pass
+    hangman(secret_word, True)
 
 
 # When you've completed your hangman_with_hint function, comment the two similar
@@ -246,17 +256,16 @@ def hangman_with_hints(secret_word):
 
 if __name__ == "__main__":
     # pass
+    secret_word = choose_word(wordlist)
 
     # To test part 2, comment out the pass line above and
     # uncomment the following two lines.
 
-    secret_word = choose_word(wordlist)
-    hangman(secret_word)
+    # hangman(secret_word)
 
 ###############
 
     # To test part 3 re-comment out the above lines and
     # uncomment the following two lines.
 
-    # secret_word = choose_word(wordlist)
-    # hangman_with_hints(secret_word)
+    hangman_with_hints(secret_word)
