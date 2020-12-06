@@ -1,0 +1,10 @@
+t1,TITLE,debate
+
+t2,AFTER,18 Oct 2016 18:00:00
+t3,BEFORE,21 Oct 2016 00:00:00
+
+t4,AND,t2,t3
+
+t5,AND,t1,t4
+
+ADD,t5
