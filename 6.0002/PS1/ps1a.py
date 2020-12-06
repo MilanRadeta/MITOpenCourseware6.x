@@ -172,15 +172,16 @@ def compare_cow_transport_algorithms():
     print()
 
 
-files = ['ps1_cow_data.txt', 'ps1_cow_data_2.txt']
-for file in files:
-    cows = load_cows(root_folder + '/' + file)
+if __name__ == '__main__':
+    files = ['ps1_cow_data.txt', 'ps1_cow_data_2.txt']
+    for file in files:
+        cows = load_cows(root_folder + '/' + file)
 
-    trips = greedy_cow_transport(cows)
-    print("Greedy cow transport: ", trips)
+        trips = greedy_cow_transport(cows)
+        print("Greedy cow transport: ", trips)
 
-    trips = brute_force_cow_transport(cows)
-    print("Brute force cow transport: ", trips)
-    print()
+        trips = brute_force_cow_transport(cows)
+        print("Brute force cow transport: ", trips)
+        print()
 
-compare_cow_transport_algorithms()
+    compare_cow_transport_algorithms()
