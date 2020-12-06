@@ -6,6 +6,9 @@
 
 from ps1_partition import get_partitions
 import time
+import pathlib
+
+root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 # ================================
 # Part A: Transporting Space Cows
@@ -30,7 +33,7 @@ def load_cows(filename):
     with open(filename, 'r') as cow_file:
         for line in cow_file:
             parts = line.split(',')
-            cows[parts[0]] = parts[1]
+            cows[parts[0]] = int(parts[1])
     return cows
 
 # Problem 2
@@ -58,8 +61,42 @@ def greedy_cow_transport(cows, limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+    result = []
+    weight_to_names = {}
+    all_weights = []
+
+    for cow in cows:
+        weight = cows[cow]
+        if weight not in weight_to_names:
+            weight_to_names[weight] = []
+            all_weights.append(weight)
+        weight_to_names[weight].append(cow)
+
+    all_weights.sort(reverse=True)
+
+    while len(weight_to_names) > 0:
+        trip = []
+        new_weights = all_weights.copy()
+        current_limit = limit
+
+        for weight in all_weights:
+            while (weight in weight_to_names):
+                if current_limit >= weight:
+                    current_limit -= weight
+                    cow = weight_to_names[weight].pop()
+                    trip.append(cow)
+                    if len(weight_to_names[weight]) <= 0:
+                        new_weights.remove(weight)
+                        del weight_to_names[weight]
+                else:
+                    break
+            if current_limit == 0:
+                break
+
+        all_weights = new_weights
+        result.append(trip)
+
+    return result
 
 # Problem 3
 
@@ -106,3 +143,8 @@ def compare_cow_transport_algorithms():
     """
     # TODO: Your code here
     pass
+
+
+cows = load_cows(root_folder + '/ps1_cow_data_2.txt')
+trips = greedy_cow_transport(cows)
+print(trips)
