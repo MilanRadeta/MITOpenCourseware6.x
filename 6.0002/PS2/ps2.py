@@ -9,6 +9,9 @@
 #
 import unittest
 from graph import Digraph, Node, WeightedEdge
+import pathlib
+
+root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 #
 # Problem 2: Building up the Campus Map
@@ -20,7 +23,11 @@ from graph import Digraph, Node, WeightedEdge
 # represented?
 #
 # Answer:
-#
+# Graph's nodes represent MIT buildings
+# Graph's edges represent a path from one building to another
+# Distances are grouped in pairs of:
+# 1) total distance between two buildings
+# 2) outside distance between two buildings
 
 
 # Problem 2b: Implementing load_map
@@ -43,11 +50,32 @@ def load_map(map_filename):
         a Digraph representing the map
     """
 
-    # TODO
+    digraph = Digraph()
     print("Loading map from file...")
+    with open(map_filename, 'r') as file:
+        for line in file:
+            parts = line.split()
+            src = Node(parts[0])
+            dest = Node(parts[1])
+            edge = WeightedEdge(src, dest, int(parts[2]), int(parts[3]))
+            edge = WeightedEdge(src, dest, int(parts[2]), int(parts[3]))
+            if not digraph.has_node(src):
+                digraph.add_node(src)
+            if not digraph.has_node(dest):
+                digraph.add_node(dest)
+            digraph.add_edge(edge)
+
+    return digraph
+
 
 # Problem 2c: Testing load_map
 # Include the lines used to test load_map below, but comment them out
+# actual = str(load_map(root_folder + '/test_load_map.txt'))
+# expected = 'a->b (10, 9)\na->c (12, 2)\nb->c (1, 1)'
+# if actual != expected:
+#     print("FAILURE")
+#     print("Expected:", expected)
+#     print("Actual:", actual)
 
 
 #
@@ -173,7 +201,8 @@ class Ps2Test(unittest.TestCase):
                    outdoor_dist=LARGE_DIST):
         start, end = expectedPath[0], expectedPath[-1]
         self._print_path_description(start, end, total_dist, outdoor_dist)
-        dfsPath = directed_dfs(self.graph, start, end, total_dist, outdoor_dist)
+        dfsPath = directed_dfs(self.graph, start, end,
+                               total_dist, outdoor_dist)
         print("Expected: ", expectedPath)
         print("DFS: ", dfsPath)
         self.assertEqual(expectedPath, dfsPath)
