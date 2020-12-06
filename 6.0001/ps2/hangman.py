@@ -12,7 +12,6 @@
 import random
 import string
 import pathlib
-pathlib.Path(__file__).parent.absolute()
 
 WORDLIST_FILENAME = pathlib.Path(
     __file__).parent.absolute().__str__() + "\\words.txt"
