@@ -86,7 +86,8 @@ def load_map(map_filename):
 # What is the objective function for this problem? What are the constraints?
 #
 # Answer:
-#
+# The objective function is the total distance traveled.
+# Constraints: maximum distance outdoors.
 
 # Problem 3b: Implement get_best_path
 def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
@@ -123,8 +124,30 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
         If there exists no path that satisfies max_total_dist and
         max_dist_outdoors constraints, then return None.
     """
-    # TODO
-    pass
+    start = Node(start)
+    end = Node(end)
+    if not digraph.has_node(start):
+        raise ValueError("Invalid start node", start)
+    if not digraph.has_node(end):
+        raise ValueError("Invalid start node", end)
+    if start == end:
+        return path[0]
+
+    for edge in digraph.get_edges_for_node():
+        dest = edge.get_destination()
+        total_dist = edge.get_total_distance() + path[1]
+        outdoor_dist = edge.get_outdoor_distance() + path[2]
+        if (dest not in path[0]
+                and outdoor_dist <= max_dist_outdoors
+                and total_dist >= best_dist):
+            new_path = [path[0] + [dest], total_dist, outdoor_dist]
+            get_best_path(digraph, dest, end, new_path,
+                          max_dist_outdoors, best_dist, best_path)
+            if (best_dist > total_dist):
+                best_dist = total_dist
+                best_path = new_path[0]
+
+    return best_path
 
 
 # Problem 3c: Implement directed_dfs
