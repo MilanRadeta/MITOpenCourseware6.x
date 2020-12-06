@@ -103,13 +103,19 @@ class PhaseTrigger(Trigger):
 
     def is_phrase_in(self, text):
         text = text.lower()
-        text_words = [word for word in text.split(
-            string.punctuation + ' ') if word]
+        for punctuation in string.punctuation:
+            text = text.replace(punctuation, ' ')
+            text = text.replace('  ', ' ')
+        text_words = text.split()
         phrase_words = self.phrase.split()
         return is_sublist(text_words, phrase_words)
 
 # Problem 3
-# TODO: TitleTrigger
+
+
+class TitleTrigger(PhaseTrigger):
+    def evaluate(self, story):
+        return self.is_phrase_in(story.title)
 
 # Problem 4
 # TODO: DescriptionTrigger
