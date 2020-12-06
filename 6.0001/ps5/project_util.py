@@ -88,20 +88,14 @@ def unicode_to_ascii(s):
     return ret
 
 
-def is_sublist(l, s):
-    if s == [] or s == l:
+def is_sublist(list, sublist):
+    if sublist == [] or sublist == list:
         return True
 
-    if len(s) > len(l):
+    if len(sublist) > len(list):
         return False
 
-    for i in range(len(l)):
-        if l[i] == s[0]:
-            n = 1
-            while (n < len(s)) and (l[i+n] == s[n]):
-                n += 1
-
-            if n == len(s):
-                return True
-
+    for i in range(0, len(list) - len(sublist) + 1):
+        if list[i: i + len(sublist)] == sublist:
+            return True
     return False
