@@ -18,7 +18,7 @@ CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
 HAND_SIZE = 7
 
 SCRABBLE_LETTER_VALUES = {
-    'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
+    'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10, '*': 0
 }
 
 # -----------------------------------
@@ -148,14 +148,14 @@ def deal_hand(n):
     returns: dictionary (string -> int)
     """
 
-    hand = {}
-    num_vowels = int(math.ceil(n / 3))
+    hand = {'*': 1}
+    num_vowels = int(math.ceil(n / 3)) - 1
 
     for i in range(num_vowels):
         x = random.choice(VOWELS)
         hand[x] = hand.get(x, 0) + 1
 
-    for i in range(num_vowels, n):
+    for i in range(num_vowels, n - 1):
         x = random.choice(CONSONANTS)
         hand[x] = hand.get(x, 0) + 1
 
@@ -212,9 +212,6 @@ def is_valid_word(word, hand, word_list):
 
     word = word.lower()
 
-    if word not in word_list:
-        return False
-
     hand = hand.copy()
     for letter in word:
         if letter not in hand:
@@ -223,7 +220,13 @@ def is_valid_word(word, hand, word_list):
         if hand[letter] < 1:
             del hand[letter]
 
-    return True
+    if '*' in word:
+        for letter in VOWELS:
+            if word.replace('*', letter) in word_list:
+                return True
+        return False
+
+    return word in word_list
 
 #
 # Problem #5: Playing a hand
