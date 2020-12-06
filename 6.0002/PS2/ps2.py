@@ -131,7 +131,7 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
     if not digraph.has_node(end_node):
         raise ValueError("Invalid start node", end)
     if start == end:
-        return path[0]
+        return path[0], path[1]
 
     for edge in digraph.get_edges_for_node(start_node):
         child = edge.get_destination().name
@@ -143,14 +143,14 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
                 and total_dist < best_dist):
             new_path = [path[0] + [child], total_dist, outdoor_dist]
 
-            new_best_path = get_best_path(digraph, child, end, new_path,
-                                          max_dist_outdoors, best_dist, best_path)
+            new_best_path, new_best_dist = get_best_path(digraph, child, end, new_path,
+                                                         max_dist_outdoors, best_dist, best_path)
 
-            if (new_best_path == best_path and best_dist > total_dist):
-                best_dist = total_dist
-                best_path = new_path[0]
+            if (best_dist > new_best_dist):
+                best_dist = new_best_dist
+                best_path = new_best_path
 
-    return best_path
+    return best_path if path[1] == 0 else (best_path, best_dist)
 
 
 # Problem 3c: Implement directed_dfs
