@@ -261,9 +261,6 @@ class CiphertextMessage(Message):
 
 
 if __name__ == '__main__':
-
-    # TODO: WRITE YOUR TEST CASES HERE
-    # Example test case (PlaintextMessage)
     plaintext = PlaintextMessage('hello', 2)
     expected = 'jgnnq'
     actual = plaintext.get_message_text_encrypted()
@@ -282,7 +279,6 @@ if __name__ == '__main__':
         print('Actual Output:', actual)
         exit(-1)
 
-    # Example test case (CiphertextMessage)
     ciphertext = CiphertextMessage('jgnnq')
     expected = (24, 'hello')
     actual = ciphertext.decrypt_message()
@@ -292,7 +288,6 @@ if __name__ == '__main__':
         print('Actual Output:', actual)
         exit(-1)
 
-    # Example test case (CiphertextMessage)
     ciphertext = CiphertextMessage('Lipps, asvph!')
     expected = (22, 'Hello, world!')
     actual = ciphertext.decrypt_message()
