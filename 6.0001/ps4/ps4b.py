@@ -3,6 +3,7 @@
 # Collaborators:
 # Time Spent: x:xx
 
+from os import execlp
 import string
 import pathlib
 
@@ -100,7 +101,7 @@ class Message(object):
         return self.valid_words.copy()
 
     def char_to_ord(letter):
-        return ord(letter) if isinstance(letter, string) else letter
+        return ord(letter) if isinstance(letter, str) else letter
 
     def get_in_range_letter(letter, shift, limits):
         min_letter, max_letter = limits
@@ -108,7 +109,8 @@ class Message(object):
         max_letter = Message.char_to_ord(max_letter)
         letter = Message.char_to_ord(letter)
 
-        shift /= abs(shift)
+        if shift != 0:
+            shift //= abs(shift)
 
         if letter < min_letter or letter > max_letter:
             letter -= (max_letter - min_letter + 1) * shift
@@ -171,7 +173,7 @@ class PlaintextMessage(Message):
             self.message_text_encrypted (string, created using shift)
 
         '''
-        super().__init__(self, text)
+        super().__init__(text)
         self.change_shift(shift)
 
     def get_shift(self):
@@ -260,18 +262,44 @@ class CiphertextMessage(Message):
 
 if __name__ == '__main__':
 
-    #    #Example test case (PlaintextMessage)
-    #    plaintext = PlaintextMessage('hello', 2)
-    #    print('Expected Output: jgnnq')
-    #    print('Actual Output:', plaintext.get_message_text_encrypted())
-    #
-    #    #Example test case (CiphertextMessage)
-    #    ciphertext = CiphertextMessage('jgnnq')
-    #    print('Expected Output:', (24, 'hello'))
-    #    print('Actual Output:', ciphertext.decrypt_message())
-
     # TODO: WRITE YOUR TEST CASES HERE
+    # Example test case (PlaintextMessage)
+    plaintext = PlaintextMessage('hello', 2)
+    expected = 'jgnnq'
+    actual = plaintext.get_message_text_encrypted()
+    if expected != actual:
+        print('FAILURE')
+        print('Expected Output: ', expected)
+        print('Actual Output:', actual)
+        exit(-1)
+
+    plaintext = PlaintextMessage('Hello, world!', 3)
+    expected = 'Khoor, zruog!'
+    actual = plaintext.get_message_text_encrypted()
+    if expected != actual:
+        print('FAILURE')
+        print('Expected Output: ', expected)
+        print('Actual Output:', actual)
+        exit(-1)
+
+    # Example test case (CiphertextMessage)
+    ciphertext = CiphertextMessage('jgnnq')
+    expected = (24, 'hello')
+    actual = ciphertext.decrypt_message()
+    if expected != actual:
+        print('FAILURE')
+        print('Expected Output: ', expected)
+        print('Actual Output:', actual)
+        exit(-1)
+
+    # Example test case (CiphertextMessage)
+    ciphertext = CiphertextMessage('Lipps, asvph!')
+    expected = (22, 'Hello, world!')
+    actual = ciphertext.decrypt_message()
+    if expected != actual:
+        print('FAILURE')
+        print('Expected Output: ', expected)
+        print('Actual Output:', actual)
+        exit(-1)
 
     # TODO: best shift value and unencrypted story
-
-    pass  # delete this line and replace with your code here
