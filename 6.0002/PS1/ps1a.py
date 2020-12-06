@@ -122,8 +122,19 @@ def brute_force_cow_transport(cows, limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+    parts = get_partitions(cows.keys())
+    min_trips = len(cows) + 1
+    best_trips = None
+    for trips in parts:
+        if len(trips) < min_trips:
+            weights_per_trips = [[cows[cow] for cow in trip] for trip in trips]
+            weight_fits = [
+                sum(weights) <= limit for weights in weights_per_trips]
+            if all(weight_fits):
+                min_trips = len(trips)
+                best_trips = trips
+    return best_trips
+
 
 # Problem 4
 
@@ -145,6 +156,10 @@ def compare_cow_transport_algorithms():
     pass
 
 
-cows = load_cows(root_folder + '/ps1_cow_data_2.txt')
-trips = greedy_cow_transport(cows)
-print(trips)
+files = ['ps1_cow_data.txt', 'ps1_cow_data_2.txt']
+for file in files:
+    cows = load_cows(root_folder + '/' + file)
+    trips = greedy_cow_transport(cows)
+    print("Greedy cow transport: ", trips)
+    trips = brute_force_cow_transport(cows)
+    print("Brute force cow transport: ", trips)
