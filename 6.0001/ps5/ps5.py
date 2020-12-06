@@ -246,20 +246,20 @@ def read_trigger_config(filename):
     }
     triggers = {}
     trigger_list = []
-    trigger_file = open(filename, 'r')
-    for line in trigger_file:
-        line = line.rstrip()
-        if not (len(line) == 0 or line.startswith('//')):
-            parts = line.split(',')
-            if parts[0] == 'ADD':
-                for part in parts[1:]:
-                    trigger_list.append(triggers[part])
-            else:
-                name = parts[0]
-                type = types[parts[1]]
-                args = [triggers[part]
-                        if part in triggers else part for part in parts[2:]]
-                triggers[name] = type(*args)
+    with open(filename, 'r') as trigger_file:
+        for line in trigger_file:
+            line = line.rstrip()
+            if not (len(line) == 0 or line.startswith('//')):
+                parts = line.split(',')
+                if parts[0] == 'ADD':
+                    for part in parts[1:]:
+                        trigger_list.append(triggers[part])
+                else:
+                    name = parts[0]
+                    type = types[parts[1]]
+                    args = [triggers[part]
+                            if part in triggers else part for part in parts[2:]]
+                    triggers[name] = type(*args)
 
     return trigger_list
 
