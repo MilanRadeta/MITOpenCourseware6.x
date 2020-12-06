@@ -7,7 +7,7 @@ import feedparser
 import string
 import time
 import threading
-from project_util import translate_html
+from project_util import translate_html, is_sublist
 from mtTkinter import *
 from datetime import datetime
 import pytz
@@ -95,7 +95,18 @@ class Trigger(object):
 # PHRASE TRIGGERS
 
 # Problem 2
-# TODO: PhraseTrigger
+
+
+class PhaseTrigger(Trigger):
+    def __init__(self, phrase):
+        self.phrase = phrase.lower()
+
+    def is_phrase_in(self, text):
+        text = text.lower()
+        text_words = [word for word in text.split(
+            string.punctuation + ' ') if word]
+        phrase_words = self.phrase.split()
+        return is_sublist(text_words, phrase_words)
 
 # Problem 3
 # TODO: TitleTrigger
