@@ -150,7 +150,7 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
                 best_dist = new_best_dist
                 best_path = new_best_path
 
-    return best_path if path[1] == 0 else (best_path, best_dist)
+    return best_path, best_dist
 
 
 # Problem 3c: Implement directed_dfs
@@ -184,10 +184,10 @@ def directed_dfs(digraph, start, end, max_total_dist, max_dist_outdoors):
     """
     result = get_best_path(digraph, start, end, [
                            [start], 0, 0], max_dist_outdoors, max_total_dist, None)
-    if result is None:
+    if result[0] is None:
         raise ValueError('There is no shortest path for given arguments')
 
-    return result
+    return result[0]
 
 
 # ================================================================
