@@ -10,8 +10,10 @@ import threading
 from project_util import translate_html, is_sublist
 from mtTkinter import *
 from datetime import datetime
-import pytz
 import xml.etree.ElementTree as ET
+import pathlib
+
+root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 
 # -----------------------------------------------------------------------
@@ -233,18 +235,33 @@ def read_trigger_config(filename):
     """
     # We give you the code to read in the file and eliminate blank lines and
     # comments. You don't need to know how it works for now!
+    types = {
+        'TITLE': TitleTrigger,
+        'DESCRIPTION': DescriptionTrigger,
+        'AFTER': AfterTrigger,
+        'BEFORE': BeforeTrigger,
+        'NOT': NotTrigger,
+        'AND': AndTrigger,
+        'OR': OrTrigger
+    }
+    triggers = {}
+    trigger_list = []
     trigger_file = open(filename, 'r')
-    lines = []
     for line in trigger_file:
         line = line.rstrip()
         if not (len(line) == 0 or line.startswith('//')):
-            lines.append(line)
+            parts = line.split(',')
+            if parts[0] == 'ADD':
+                for part in parts[1:]:
+                    trigger_list.append(triggers[part])
+            else:
+                name = parts[0]
+                type = types[parts[1]]
+                args = [triggers[part]
+                        if part in triggers else part for part in parts[2:]]
+                triggers[name] = type(*args)
 
-    # TODO: Problem 11
-    # line is the list of lines that you need to parse and for which you need
-    # to build triggers
-
-    print(lines)  # for now, print it so you see what it contains!
+    return trigger_list
 
 
 SLEEPTIME = 120  # seconds -- how often we poll
@@ -261,8 +278,7 @@ def main_thread(master):
         triggerlist = [t1, t4]
 
         # Problem 11
-        # TODO: After implementing read_trigger_config, uncomment this line
-        # triggerlist = read_trigger_config('triggers.txt')
+        triggerlist = read_trigger_config(root_folder + '/triggers.txt')
 
         # HELPER CODE - you don't need to understand this!
         # Draws the popup window that displays the filtered stories
