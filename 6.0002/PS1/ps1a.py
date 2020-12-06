@@ -152,14 +152,35 @@ def compare_cow_transport_algorithms():
     Returns:
     Does not return anything.
     """
-    # TODO: Your code here
-    pass
+    file = 'ps1_cow_data.txt'
+    cows = load_cows(root_folder + '/' + file)
+
+    start = time.time()
+    trips = greedy_cow_transport(cows)
+    end = time.time()
+    print('GREEDY COW TRANSPORT')
+    print("Trips count: ", len(trips))
+    print("Calculated in: ", end - start, 's')
+    print()
+
+    start = time.time()
+    trips = brute_force_cow_transport(cows)
+    end = time.time()
+    print('BRUTE FORCE COW TRANSPORT')
+    print("Trips count: ", len(trips))
+    print("Calculated in: ", end - start, 's')
+    print()
 
 
 files = ['ps1_cow_data.txt', 'ps1_cow_data_2.txt']
 for file in files:
     cows = load_cows(root_folder + '/' + file)
+
     trips = greedy_cow_transport(cows)
     print("Greedy cow transport: ", trips)
+
     trips = brute_force_cow_transport(cows)
     print("Brute force cow transport: ", trips)
+    print()
+
+compare_cow_transport_algorithms()
