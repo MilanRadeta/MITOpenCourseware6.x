@@ -118,7 +118,11 @@ class TitleTrigger(PhaseTrigger):
         return self.is_phrase_in(story.title)
 
 # Problem 4
-# TODO: DescriptionTrigger
+
+
+class DescriptionTrigger(PhaseTrigger):
+    def evaluate(self, story):
+        return self.is_phrase_in(story.description)
 
 # TIME TRIGGERS
 
