@@ -244,7 +244,23 @@ def simulation_without_antibiotic(num_bacteria,
         populations (list of lists or 2D array): populations[i][j] is the
             number of bacteria in trial i at time step j
     """
-    pass  # TODO
+    populations = []
+    max_time_steps = 300
+    for i in range(num_trials):
+        populations.append([num_bacteria])
+        bacteria = [SimpleBacteria(birth_prob, death_prob)] * num_bacteria
+        patient = Patient(bacteria, max_pop)
+        time_steps = max_time_steps
+        while time_steps > 0:
+            time_steps -= 1
+            patient.update()
+            populations[-1].append(patient.get_total_pop())
+    x_coords = list(range(max_time_steps))
+    y_coords = [calc_pop_avg(populations, i) for i in x_coords]
+    make_one_curve_plot(x_coords, y_coords, 'Time Steps',
+                        'Avg population',
+                        'Avg population over time ' +
+                        '(max_pop=%, birth_prob=%, death_prob=%, trials=%)' % (max_pop, birth_prob, death_prob, num_trials))
 
 
 # When you are ready to run the simulation, uncomment the next line
