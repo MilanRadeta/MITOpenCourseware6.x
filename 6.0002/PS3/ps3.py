@@ -85,7 +85,8 @@ class RectangularRoom(object):
         """
         self.width = width
         self.height = height
-        self.tiles = [[dirt_amount for i in range(10)] for j in range(10)]
+        self.tiles = [[dirt_amount for i in range(
+            height)] for j in range(width)]
 
     def clean_tile_at_position(self, pos, capacity):
         """
@@ -445,7 +446,7 @@ class FaultyRobot(Robot):
 
 # === Problem 5
 def run_simulation(num_robots, speed, capacity, width, height, dirt_amount, min_coverage, num_trials,
-                   robot_type):
+                   robot_type, anim=False):
     """
     Runs num_trials trials of the simulation and returns the mean number of
     time-steps needed to clean the fraction min_coverage of the room.
@@ -465,14 +466,36 @@ def run_simulation(num_robots, speed, capacity, width, height, dirt_amount, min_
     robot_type: class of robot to be instantiated (e.g. StandardRobot or
                 FaultyRobot)
     """
-    raise NotImplementedError
+    time_steps = 0
+    for i in range(num_trials):
+        coverage = 0
+
+        room = EmptyRoom(width, height, dirt_amount)
+        robots = [robot_type(room, speed, capacity) for i in range(num_robots)]
+
+        if anim:
+            anim = ps3_visualize.RobotVisualization(
+                num_robots, width, height, [])
+
+        while coverage < min_coverage:
+            time_steps += 1
+            i = 0
+            for robot in robots:
+                i += 1
+                robot.update_position_and_clean()
+            if anim:
+                anim.update(room, robots)
+            coverage = float(room.get_num_cleaned_tiles()) / \
+                room.get_num_tiles()
+    return time_steps / num_trials
 
 
-# print ('avg time steps: ' + str(run_simulation(1, 1.0, 1, 5, 5, 3, 1.0, 50, StandardRobot)))
-# print ('avg time steps: ' + str(run_simulation(1, 1.0, 1, 10, 10, 3, 0.8, 50, StandardRobot)))
-# print ('avg time steps: ' + str(run_simulation(1, 1.0, 1, 10, 10, 3, 0.9, 50, StandardRobot)))
-# print ('avg time steps: ' + str(run_simulation(1, 1.0, 1, 20, 20, 3, 0.5, 50, StandardRobot)))
-# print ('avg time steps: ' + str(run_simulation(3, 1.0, 1, 20, 20, 3, 0.5, 50, StandardRobot)))
+# run_simulation(num_robots, speed, capacity, width, height, dirt_amount, min_coverage, num_trials, robot_type):
+# print('avg time steps: ' + str(run_simulation(1, 1.0, 1, 5, 5, 3, 1.0, 50, StandardRobot)))
+# print('avg time steps: ' + str(run_simulation(1, 1.0, 1, 10, 10, 3, 0.8, 50, StandardRobot)))
+# print('avg time steps: ' + str(run_simulation(1, 1.0, 1, 10, 10, 3, 0.9, 50, StandardRobot)))
+# print('avg time steps: ' + str(run_simulation(1, 1.0, 1, 20, 20, 3, 0.5, 50, StandardRobot)))
+# print('avg time steps: ' + str(run_simulation(3, 1.0, 1, 20, 20, 3, 0.5, 50, StandardRobot)))
 
 # === Problem 6
 #
@@ -487,6 +510,7 @@ def run_simulation(num_robots, speed, capacity, width, height, dirt_amount, min_
 #       10x30, 20x15, 25x12, and 50x6?
 #
 #
+
 
 def show_plot_compare_strategies(title, x_label, y_label):
     """
