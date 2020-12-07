@@ -302,8 +302,7 @@ def rmse(y, estimated):
     Returns:
         a float for the root mean square error term
     """
-    # TODO
-    pass
+    return (sum((y - estimated) ** 2) / len(y)) ** (1/2)
 
 
 def gen_std_devs(climate, multi_cities, years):
