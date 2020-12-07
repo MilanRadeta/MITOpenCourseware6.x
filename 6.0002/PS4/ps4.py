@@ -208,7 +208,7 @@ def calc_pop_avg(populations, n):
     Returns:
         float: The average bacteria population size at time step n
     """
-    pass  # TODO
+    return sum([p[n] for p in populations]) / len(populations)
 
 
 def simulation_without_antibiotic(num_bacteria,
