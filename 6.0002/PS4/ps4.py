@@ -191,6 +191,7 @@ class Patient(object):
             except NoChildException:
                 pass
         self.bacteria = survivors + children
+        return len(self.bacteria)
 
 
 ##########################
@@ -425,14 +426,15 @@ class TreatedPatient(Patient):
         Don't forget to call Patient's __init__ method at the start of this
         method.
         """
-        pass  # TODO
+        super().__init__(bacteria, max_pop)
+        self.on_antibiotic = False
 
     def set_on_antibiotic(self):
         """
         Administer an antibiotic to this patient. The antibiotic acts on the
         bacteria population for all subsequent time steps.
         """
-        pass  # TODO
+        self.on_antibiotic = True
 
     def get_resist_pop(self):
         """
@@ -441,7 +443,7 @@ class TreatedPatient(Patient):
         Returns:
             int: the number of bacteria with antibiotic resistance
         """
-        pass  # TODO
+        return len([b for b in self.bacteria if b.get_resistant()])
 
     def update(self):
         """
@@ -468,7 +470,17 @@ class TreatedPatient(Patient):
         Returns:
             int: The total bacteria population at the end of the update
         """
-        pass  # TODO
+        survivors = [b for b in self.bacteria if not b.is_killed() and (
+            b.get_resistant() or not self.on_antibiotic)]
+        pop_density = len(survivors) / self.max_pop
+        children = []
+        for b in survivors:
+            try:
+                children.append(b.reproduce(pop_density))
+            except NoChildException:
+                pass
+        self.bacteria = survivors + children
+        return len(self.bacteria)
 
 
 ##########################
