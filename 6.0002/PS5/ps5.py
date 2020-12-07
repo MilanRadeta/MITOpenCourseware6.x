@@ -196,6 +196,17 @@ def r_squared(y, estimated):
     return 1 - sum_diffs / sum_mean_diffs
 
 
+def plot_data_and_estimation(x, y, estimated, title, xlabel='Year', ylabel='Degrees Celsius'):
+    pl.figure()
+    pl.plot(x, y, 'bo', label='Raw Data')
+    pl.plot(x, estimated, 'r-', label='Estimation')
+    pl.legend()
+    pl.xlabel(xlabel)
+    pl.ylabel(ylabel)
+    pl.title(title)
+    pl.show()
+
+
 def evaluate_models_on_training(x, y, models):
     """
     For each regression model, compute the R-squared value for this model with the
@@ -231,15 +242,7 @@ def evaluate_models_on_training(x, y, models):
         title += ', R^2=%.4f' % r2
         if seos is not None:
             title += ', SE/slope=%.4f' % seos
-
-        pl.figure()
-        pl.plot(x, y, 'bo', label='Raw Data')
-        pl.plot(x, estimated, 'r-', label='Estimation')
-        pl.legend()
-        pl.xlabel('Year')
-        pl.ylabel('Degrees Celsius')
-        pl.title(title)
-        pl.show()
+        plot_data_and_estimation(x, y, estimated, title)
 
 
 def gen_cities_avg(climate, multi_cities, years):
@@ -348,8 +351,13 @@ def evaluate_models_on_testing(x, y, models):
     Returns:
         None
     """
-    # TODO
-    pass
+    for model in models:
+        estimated = pylab.polyval(model, x)
+        n = len(model) - 1
+        rm_se = rmse(y, estimated)
+        title = 'n=%d' % n
+        title += ', RMSE=%.4f' % rm_se
+        plot_data_and_estimation(x, y, estimated, title)
 
 
 def total_days_in_year(year):
