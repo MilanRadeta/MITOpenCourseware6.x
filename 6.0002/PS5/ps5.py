@@ -257,8 +257,9 @@ def gen_cities_avg(climate, multi_cities, years):
         this array corresponds to the average annual temperature over the given
         cities for a given year.
     """
-    # TODO
-    pass
+    avg_per_city = pylab.array([calc_avg_city_annual_temps(
+        climate, city, years) for city in multi_cities])
+    return sum(avg_per_city) / len(avg_per_city)
 
 
 def moving_average(y, window_length):
@@ -343,6 +344,26 @@ def evaluate_models_on_testing(x, y, models):
     pass
 
 
+def total_days_in_year(year):
+    return 366 if year % 4 == 0 else 365
+
+
+def calc_annual_temp(temps, year):
+    return sum(temps) / total_days_in_year(year)
+
+
+def calc_avg_city_annual_temp(climate, city, year):
+    return calc_annual_temp(climate.get_yearly_temp(city, year), year)
+
+
+def calc_avg_city_annual_temps(climate, city, years):
+    return [calc_avg_city_annual_temp(climate, city, year) for year in years]
+
+
+def calc_daily_city_temps(climate, city, years, day=10, month=1):
+    return pylab.array([climate.get_daily_temp(city, month, day, year) for year in years])
+
+
 if __name__ == '__main__':
     # Part A.4
     # TODO: replace this line with your code
@@ -353,18 +374,18 @@ if __name__ == '__main__':
     for year in years:
         total_days[year] = 366 if year % 4 == 0 else 365
 
-    temps = pylab.array([climate.get_daily_temp(
-        'NEW YORK', 1, 10, year) for year in years])
+    temps = calc_daily_city_temps(climate, 'NEW YORK', years)
     models = generate_models(years, temps, degs)
     evaluate_models_on_training(years, temps, models)
 
-    temps = [sum(climate.get_yearly_temp('NEW YORK', year)) /
-             total_days[year] for year in years]
+    temps = calc_avg_city_annual_temps(climate, 'NEW YORK', years)
     models = generate_models(years, temps, degs)
     evaluate_models_on_training(years, temps, models)
 
     # Part B
-    # TODO: replace this line with your code
+    temps = gen_cities_avg(climate, CITIES, years)
+    models = generate_models(years, temps, degs)
+    evaluate_models_on_training(years, temps, models)
 
     # Part C
     # TODO: replace this line with your code
