@@ -83,6 +83,8 @@ class RectangularRoom(object):
         height: an integer > 0
         dirt_amount: an integer >= 0
         """
+        width = int(width)
+        height = int(height)
         self.width = width
         self.height = height
         self.tiles = [[dirt_amount for i in range(
@@ -504,12 +506,13 @@ def run_simulation(num_robots, speed, capacity, width, height, dirt_amount, min_
 #
 # 1)How does the performance of the two robot types compare when cleaning 80%
 #       of a 20x20 room?
-#
-#
+#   Standard robots are obviosly faster, but with increased number of robots the faulty robots are slighty slower.
+#   The time steps difference decreases from 500 to 50.
 # 2) How does the performance of the two robot types compare when two of each
 #       robot cleans 80% of rooms with dimensions
 #       10x30, 20x15, 25x12, and 50x6?
-#
+#   Standard robots are faster and they keep the same performance mostly.
+#   Time step difference increases with aspect ratio, from 150 to 400.
 #
 
 
@@ -561,5 +564,7 @@ def show_plot_room_shape(title, x_label, y_label):
     pylab.show()
 
 
-#show_plot_compare_strategies('Time to clean 80% of a 20x20 room, for various numbers of robots','Number of robots','Time / steps')
-#show_plot_room_shape('Time to clean 80% of a 300-tile room for various room shapes','Aspect Ratio', 'Time / steps')
+# show_plot_compare_strategies(
+#     'Time to clean 80% of a 20x20 room, for various numbers of robots', 'Number of robots', 'Time / steps')
+# show_plot_room_shape(
+#     'Time to clean 80% of a 300-tile room for various room shapes', 'Aspect Ratio', 'Time / steps')
