@@ -62,7 +62,7 @@ class TestPS5(unittest.TestCase):
         r_sq = ps5.r_squared(y, est)
         self.assertIsInstance(r_sq, float, "r_squared should return a float")
         rounded = round(r_sq, 6)
-        self.assertEquals(rounded, -0.030303)
+        self.assertEqual(rounded, -0.030303)
 
         # another basic case:
         # actual values    [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -71,12 +71,12 @@ class TestPS5(unittest.TestCase):
         r_sq = ps5.r_squared(y, est)
         self.assertIsInstance(r_sq, float, "r_squared should return a float")
         rounded = round(r_sq, 6)
-        self.assertEquals(rounded, -2.454545)
+        self.assertEqual(rounded, -2.454545)
 
         # case where actual = estimated, so R^2=1
         r_sq = ps5.r_squared(y, y)
         self.assertIsInstance(r_sq, float, "r_squared should return a float")
-        self.assertEquals(r_sq, 1.0)
+        self.assertEqual(r_sq, 1.0)
 
     def test_gen_cities_avg(self):
         # test for just one city
