@@ -292,7 +292,7 @@ def calc_pop_std(populations, t):
     """
     mean = calc_pop_avg(populations, t)
     sum_squared_mean_diff = sum([(p[t] - mean) ** 2 for p in populations])
-    return (sum_squared_mean_diff / len(populations)) ** (1/2)
+    return (sum_squared_mean_diff / len(populations)) ** 0.5
 
 
 def calc_95_ci(populations, t):
@@ -316,7 +316,10 @@ def calc_95_ci(populations, t):
 
         I.e., you should return a tuple containing (mean, width)
     """
-    pass  # TODO
+    mean = calc_pop_avg(populations, t)
+    std = calc_pop_std(populations, t)
+    sem = std / len(populations) ** 0.5
+    return (mean, 1.96 * sem)
 
 
 ##########################
