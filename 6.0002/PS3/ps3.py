@@ -478,15 +478,16 @@ def run_simulation(num_robots, speed, capacity, width, height, dirt_amount, min_
                 num_robots, width, height, [])
 
         while coverage < min_coverage:
-            time_steps += 1
-            i = 0
             for robot in robots:
-                i += 1
                 robot.update_position_and_clean()
+
             if anim:
                 anim.update(room, robots)
+
+            time_steps += 1
             coverage = float(room.get_num_cleaned_tiles()) / \
                 room.get_num_tiles()
+
     return time_steps / num_trials
 
 
