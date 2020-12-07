@@ -397,7 +397,9 @@ if __name__ == '__main__':
     evaluate_models_on_training(years, temps, models)
 
     # Part C
-    # TODO: replace this line with your code
+    temps = moving_average(temps, 5)
+    models = generate_models(years, temps, degs)
+    evaluate_models_on_training(years, temps, models)
 
     # Part D.2
     # TODO: replace this line with your code
