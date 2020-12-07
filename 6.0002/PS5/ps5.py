@@ -346,12 +346,21 @@ def evaluate_models_on_testing(x, y, models):
 if __name__ == '__main__':
     # Part A.4
     # TODO: replace this line with your code
-    degs = [1, 2, 3, 4, 8]
+    degs = [1]
     climate = Climate(root_folder + '/data.csv')
     years = pylab.array(TRAINING_INTERVAL)
+    total_days = {}
+    for year in years:
+        total_days[year] = 366 if year % 4 == 0 else 365
+
     temps = pylab.array([climate.get_daily_temp(
-        'NEW YORK', 1, 10, year) for year in TRAINING_INTERVAL])
-    models = generate_models(TRAINING_INTERVAL, temps, degs)
+        'NEW YORK', 1, 10, year) for year in years])
+    models = generate_models(years, temps, degs)
+    evaluate_models_on_training(years, temps, models)
+
+    temps = [sum(climate.get_yearly_temp('NEW YORK', year)) /
+             total_days[year] for year in years]
+    models = generate_models(years, temps, degs)
     evaluate_models_on_training(years, temps, models)
 
     # Part B
