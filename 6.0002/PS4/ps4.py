@@ -257,10 +257,9 @@ def simulation_without_antibiotic(num_bacteria,
             populations[-1].append(patient.get_total_pop())
     x_coords = list(range(max_time_steps))
     y_coords = [calc_pop_avg(populations, i) for i in x_coords]
-    make_one_curve_plot(x_coords, y_coords, 'Time Steps',
-                        'Avg population',
-                        'Avg population over time ' +
-                        '(max_pop=%, birth_prob=%, death_prob=%, trials=%)' % (max_pop, birth_prob, death_prob, num_trials))
+    make_one_curve_plot(x_coords, y_coords, 'Timestep',
+                        'Average Population', 'Without Antibiotic')
+    return populations
 
 
 # When you are ready to run the simulation, uncomment the next line
