@@ -322,9 +322,12 @@ def calc_95_ci(populations, t):
     return (mean, 1.96 * sem)
 
 
+# print('(mean, ci) =', calc_95_ci(populations, 299))
+
 ##########################
 # PROBLEM 4
 ##########################
+
 
 class ResistantBacteria(SimpleBacteria):
     """A bacteria cell that can have antibiotic resistance."""
