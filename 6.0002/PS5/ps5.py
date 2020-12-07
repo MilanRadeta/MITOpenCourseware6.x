@@ -4,6 +4,7 @@
 # Collaborators (discussion):
 # Time:
 
+from matplotlib import pyplot as pl
 import pylab
 import re
 
@@ -204,7 +205,7 @@ def evaluate_models_on_training(x, y, models):
     information:
         degree of your regression model,
         R-square of your model evaluated on the given data points,
-        and SE/slope (if degree of this model is 1 -- see se_over_slope). 
+        and SE/slope (if degree of this model is 1 -- see se_over_slope).
 
     Args:
         x: an 1-d pylab array with length N, representing the x-coordinates of
@@ -218,8 +219,24 @@ def evaluate_models_on_training(x, y, models):
     Returns:
         None
     """
-    # TODO
-    pass
+    for model in models:
+        estimated = pylab.polyval(model, x)
+        n = len(model)
+        r2 = r_squared(y, estimated)
+        seos = se_over_slope(x, y, estimated, model) if n <= 2 else None
+        title = 'n=%' % (n)
+        title += ', R^2=%' % (r2)
+        if seos is not None:
+            title += ', SE/slope=%' % (seos)
+
+        pl.figure()
+        pl.plot(x, y, label='Raw data', kwargs=('o', 'b'))
+        pl.plot(x, estimated, label='Estimation', kwargs=('-', 'r'))
+        pl.legend()
+        pl.xlabel('Year')
+        pl.ylabel('Degrees Celsius')
+        pl.title(title)
+        pl.show()
 
 
 def gen_cities_avg(climate, multi_cities, years):
@@ -279,7 +296,7 @@ def rmse(y, estimated):
 def gen_std_devs(climate, multi_cities, years):
     """
     For each year in years, compute the standard deviation over the averaged yearly
-    temperatures for each city in multi_cities. 
+    temperatures for each city in multi_cities.
 
     Args:
         climate: instance of Climate
@@ -288,7 +305,7 @@ def gen_std_devs(climate, multi_cities, years):
 
     Returns:
         a pylab 1-d array of floats with length = len(years). Each element in
-        this array corresponds to the standard deviation of the average annual 
+        this array corresponds to the standard deviation of the average annual
         city temperatures for the given cities in a given year.
     """
     # TODO
@@ -305,7 +322,7 @@ def evaluate_models_on_testing(x, y, models):
     of this figure appropriately and have a title reporting the following
     information:
         degree of your regression model,
-        RMSE of your model evaluated on the given data points. 
+        RMSE of your model evaluated on the given data points.
 
     Args:
         x: an 1-d pylab array with length N, representing the x-coordinates of
