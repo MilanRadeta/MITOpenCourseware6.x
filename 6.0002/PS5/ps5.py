@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Problem Set 5: Experimental Analysis
-# Name: 
+# Name:
 # Collaborators (discussion):
 # Time:
 
@@ -38,10 +38,13 @@ TESTING_INTERVAL = range(2010, 2016)
 """
 Begin helper code
 """
+
+
 class Climate(object):
     """
     The collection of temperature records loaded from given csv file
     """
+
     def __init__(self, filename):
         """
         Initialize a Climate instance, which stores the temperature records
@@ -57,7 +60,8 @@ class Climate(object):
         for line in f:
             items = line.strip().split(',')
 
-            date = re.match('(\d\d\d\d)(\d\d)(\d\d)', items[header.index('DATE')])
+            date = re.match('(\d\d\d\d)(\d\d)(\d\d)',
+                            items[header.index('DATE')])
             year = int(date.group(1))
             month = int(date.group(2))
             day = int(date.group(3))
@@ -71,7 +75,7 @@ class Climate(object):
             if month not in self.rawdata[city][year]:
                 self.rawdata[city][year][month] = {}
             self.rawdata[city][year][month][day] = temperature
-            
+
         f.close()
 
     def get_yearly_temp(self, city, year):
@@ -116,13 +120,14 @@ class Climate(object):
         assert day in self.rawdata[city][year][month], "provided day is not available"
         return self.rawdata[city][year][month][day]
 
+
 def se_over_slope(x, y, estimated, model):
     """
     For a linear regression model, calculate the ratio of the standard error of
     this fitted curve's slope to the slope. The larger the absolute value of
     this ratio is, the more likely we have the upward/downward trend in this
     fitted curve by chance.
-    
+
     Args:
         x: an 1-d pylab array with length N, representing the x-coordinates of
             the N sample points
@@ -143,9 +148,11 @@ def se_over_slope(x, y, estimated, model):
     SE = pylab.sqrt(EE/(len(x)-2)/var_x)
     return SE/model[0]
 
+
 """
 End helper code
 """
+
 
 def generate_models(x, y, degs):
     """
@@ -163,14 +170,13 @@ def generate_models(x, y, degs):
         a list of pylab arrays, where each array is a 1-d array of coefficients
         that minimizes the squared error of the fitting polynomial
     """
-    # TODO
-    pass
+    return [pylab.polyfit(x, y, deg) for deg in degs]
 
 
 def r_squared(y, estimated):
     """
     Calculate the R-squared error term.
-    
+
     Args:
         y: 1-d pylab array with length N, representing the y-coordinates of the
             N sample points
@@ -182,6 +188,7 @@ def r_squared(y, estimated):
     """
     # TODO
     pass
+
 
 def evaluate_models_on_training(x, y, models):
     """
@@ -212,6 +219,7 @@ def evaluate_models_on_training(x, y, models):
     # TODO
     pass
 
+
 def gen_cities_avg(climate, multi_cities, years):
     """
     Compute the average annual temperature over multiple cities.
@@ -230,6 +238,7 @@ def gen_cities_avg(climate, multi_cities, years):
     # TODO
     pass
 
+
 def moving_average(y, window_length):
     """
     Compute the moving average of y with specified window length.
@@ -247,6 +256,7 @@ def moving_average(y, window_length):
     # TODO
     pass
 
+
 def rmse(y, estimated):
     """
     Calculate the root mean square error term.
@@ -262,6 +272,7 @@ def rmse(y, estimated):
     """
     # TODO
     pass
+
 
 def gen_std_devs(climate, multi_cities, years):
     """
@@ -280,6 +291,7 @@ def gen_std_devs(climate, multi_cities, years):
     """
     # TODO
     pass
+
 
 def evaluate_models_on_testing(x, y, models):
     """
@@ -308,9 +320,10 @@ def evaluate_models_on_testing(x, y, models):
     # TODO
     pass
 
+
 if __name__ == '__main__':
 
-    pass 
+    pass
 
     # Part A.4
     # TODO: replace this line with your code
