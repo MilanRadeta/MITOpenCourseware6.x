@@ -7,6 +7,9 @@
 from matplotlib import pyplot as pl
 import pylab
 import re
+import pathlib
+
+root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 # cities in our weather data
 CITIES = [
@@ -221,17 +224,17 @@ def evaluate_models_on_training(x, y, models):
     """
     for model in models:
         estimated = pylab.polyval(model, x)
-        n = len(model)
+        n = len(model) - 1
         r2 = r_squared(y, estimated)
-        seos = se_over_slope(x, y, estimated, model) if n <= 2 else None
-        title = 'n=%' % (n)
-        title += ', R^2=%' % (r2)
+        seos = se_over_slope(x, y, estimated, model) if n <= 1 else None
+        title = 'n=%d' % n
+        title += ', R^2=%.4f' % r2
         if seos is not None:
-            title += ', SE/slope=%' % (seos)
+            title += ', SE/slope=%.4f' % seos
 
         pl.figure()
-        pl.plot(x, y, label='Raw data', kwargs=('o', 'b'))
-        pl.plot(x, estimated, label='Estimation', kwargs=('-', 'r'))
+        pl.plot(x, y, 'bo', label='Raw Data')
+        pl.plot(x, estimated, 'r-', label='Estimation')
         pl.legend()
         pl.xlabel('Year')
         pl.ylabel('Degrees Celsius')
@@ -341,11 +344,15 @@ def evaluate_models_on_testing(x, y, models):
 
 
 if __name__ == '__main__':
-
-    pass
-
     # Part A.4
     # TODO: replace this line with your code
+    degs = [1, 2, 3, 4, 8]
+    climate = Climate(root_folder + '/data.csv')
+    years = pylab.array(TRAINING_INTERVAL)
+    temps = pylab.array([climate.get_daily_temp(
+        'NEW YORK', 1, 10, year) for year in TRAINING_INTERVAL])
+    models = generate_models(TRAINING_INTERVAL, temps, degs)
+    evaluate_models_on_training(years, temps, models)
 
     # Part B
     # TODO: replace this line with your code
