@@ -271,6 +271,7 @@ def simulation_without_antibiotic(num_bacteria,
 # PROBLEM 3
 ##########################
 
+
 def calc_pop_std(populations, t):
     """
     Finds the standard deviation of populations across different trials
@@ -567,6 +568,8 @@ def simulation_with_antibiotic(num_bacteria,
 #                                                       resistant=False,
 #                                                       mut_prob=0.8,
 #                                                       num_trials=50)
+# print('Total pop: (mean, ci) =', calc_95_ci(total_pop, 299))
+# print('Resistant pop: (mean, ci) =', calc_95_ci(resistant_pop, 299))
 
 # total_pop, resistant_pop = simulation_with_antibiotic(num_bacteria=100,
 #                                                       max_pop=1000,
@@ -575,3 +578,5 @@ def simulation_with_antibiotic(num_bacteria,
 #                                                       resistant=False,
 #                                                       mut_prob=0.8,
 #                                                       num_trials=50)
+# print('Total pop: (mean, ci) =', calc_95_ci(total_pop, 299))
+# print('Resistant pop: (mean, ci) =', calc_95_ci(resistant_pop, 299))
