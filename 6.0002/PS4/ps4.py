@@ -249,7 +249,8 @@ def simulation_without_antibiotic(num_bacteria,
     max_time_steps = 300
     for i in range(num_trials):
         populations.append([num_bacteria])
-        bacteria = [SimpleBacteria(birth_prob, death_prob)] * num_bacteria
+        bacteria = [SimpleBacteria(birth_prob, death_prob)
+                    for i in range(num_bacteria)]
         patient = Patient(bacteria, max_pop)
         time_steps = max_time_steps
         while time_steps > 0:
@@ -531,7 +532,30 @@ def simulation_with_antibiotic(num_bacteria,
             resistant_pop[i][j] is the number of resistant bacteria for
             trial i at time step j
     """
-    pass  # TODO
+    populations = []
+    resistant_pop = []
+    antibiotic_step = 150
+    max_time_steps = antibiotic_step + 250
+    for i in range(num_trials):
+        populations.append([num_bacteria])
+        resistant_pop.append([num_bacteria if resistant else 0])
+        bacteria = [ResistantBacteria(
+            birth_prob, death_prob, resistant, mut_prob) for i in range(num_bacteria)]
+        patient = TreatedPatient(bacteria, max_pop)
+        time_steps = 0
+        while time_steps < max_time_steps:
+            if time_steps == antibiotic_step:
+                patient.set_on_antibiotic()
+            time_steps += 1
+            patient.update()
+            populations[-1].append(patient.get_total_pop())
+            resistant_pop[-1].append(patient.get_resist_pop())
+    x_coords = list(range(max_time_steps))
+    y_coords = [calc_pop_avg(populations, i) for i in x_coords]
+    y_coords2 = [calc_pop_avg(resistant_pop, i) for i in x_coords]
+    make_two_curve_plot(x_coords, y_coords, y_coords2, 'Total', 'Resistant',
+                        'Timestep', 'Average Population', 'With an Antibiotic')
+    return (populations, resistant_pop)
 
 
 # When you are ready to run the simulations, uncomment the next lines one
