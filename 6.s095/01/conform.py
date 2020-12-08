@@ -6,6 +6,7 @@
 
 caps = ['F', 'F', 'B', 'B', 'B', 'F', 'B', 'B', 'B', 'F', 'F', 'B', 'F']
 cap2 = ['F', 'F', 'B', 'B', 'B', 'F', 'B', 'B', 'B', 'F', 'F', 'F', 'F']
+cap3 = ['F', 'F', 'B', 'H', 'B', 'F', 'B', 'B', 'B', 'F', 'H', 'F', 'F']
 
 
 def pleaseConform(caps):
@@ -16,36 +17,51 @@ def pleaseConform(caps):
     intervals = []
 
     # Determine intervals where caps are on in the same direction
-    for i in range(1, len(caps)):
-        if caps[start] != caps[i]:
-            # each interval is a tuple with 3 elements (start, end, type)
-            intervals.append((start, i - 1, caps[start]))
+    for i in range(1, len(caps) + 1):
+        if i >= len(caps) or caps[start] != caps[i]:
+            if (caps[start] != 'H'):
+                # each interval is a tuple with 3 elements (start, end, type)
+                intervals.append((start, i - 1, caps[start]))
 
-            if caps[start] == 'F':
-                forward += 1
-            else:
-                backward += 1
+                if caps[start] == 'F':
+                    forward += 1
+                elif caps[start] == 'B':
+                    backward += 1
             start = i
 
-    # Need to add the last interval after for loop completes execution
-    intervals.append((start, len(caps) - 1, caps[start]))
-    if caps[start] == 'F':
-        forward += 1
-    else:
-        backward += 1
-
-##    print (intervals)
-##    print (forward, backward)
-    if forward < backward:
-        flip = 'F'
-    else:
-        flip = 'B'
+    flip = 'F' if forward < backward else 'B'
     for t in intervals:
         if t[2] == flip:
             # Exercise: if t[0] == t[1] change the printing!
-            print('People in positions', t[0],
-                  'through', t[1], 'flip your caps!')
+            if t[0] == t[1]:
+                print('Person at position', t[0], 'flip your cap!')
+            else:
+                print('People in positions', t[0],
+                      'through', t[1], 'flip your caps!')
 
 
-pleaseConform(caps)
+def pleaseConformOnepass(caps):
+    if len(caps) <= 0:
+        return
+    caps = caps + [caps[0]]
+    start = None
+    for i in range(1, len(caps)):
+        if caps[i] != caps[i-1]:
+            if caps[i] != caps[0] and caps[i] != 'H':
+                start = i
+            elif start is not None and caps[start] != 'H':
+                if start == i - 1:
+                    print('Person at position', start, 'flip your cap!')
+                else:
+                    print('People in positions', start,
+                          'through', i-1, 'flip your caps!')
+                start = None
+
+
+# pleaseConform(caps)
 # pleaseConform(cap2)
+pleaseConform(cap3)
+# pleaseConformOnepass(caps)
+# pleaseConformOnepass(cap2)
+# pleaseConformOnepass(cap3)
+# pleaseConformOnepass([])
