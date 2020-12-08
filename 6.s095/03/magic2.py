@@ -11,41 +11,55 @@ from itertools import permutations
 suits = ['C', 'D', 'H', 'S']
 ranks = ['A'] + [str(i) for i in range(2, 11)] + ['J', 'Q', 'K']
 separator = '_'
-deck = ['%s%s%s' % (rank, separator, s) for rank in ranks for s in suits]
+# deck = ['%s%s%s' % (rank, separator, s) for rank in ranks for s in suits]
+deck = ['%s%s%s' % (rank, separator, s) for s in suits for rank in ranks ]
 
-def BaseAsistant(card_fun):
+def BaseAssistant(card_fun):
     print ('Cards are character strings as shown below.')
     print ('Ordering is:', deck)
 
     #Initialization
     cards, cind, cardsuits, cnumbers = [], [], [], []
     numsuits = [0, 0, 0, 0]
-    pairsuit = None
+    suit_cards = [[], [], [], []]
 
     d = deck.copy()
     #Take cards as input from user/audience
     #Various data structures are filled in
     for i in range(5):
         n = card_fun(i, d)
-        card = d[n]
-        d.remove(card)
+        hidden = d[n]
+        d.remove(hidden)
 
-        parts = card.split(separator)
+        parts = hidden.split(separator)
         rank = parts[0]
         rank = ranks.index(rank)
         suit = parts[1]
         suit = suits.index(suit)
 
-        cards.append(card)
-        cind.append(deck.index(card))
+        cards.append(hidden)
+        cind.append(deck.index(hidden))
         cardsuits.append(suit)
         cnumbers.append(rank)
-        numsuits[suit] += 1
-        if numsuits[suit] > 1:
-            pairsuit = suit
 
-    #Find two cards out of the 5 that have the same suit. Guaranteed to exist.
-    cardh = [i for i in range(5) if cardsuits[i] == pairsuit]
+        numsuits[suit] += 1
+        suit_cards[suit].append(hidden)
+
+    min_diff = len(ranks)
+    cardh = []
+    for c in suit_cards:
+        if len(c) <= 1:
+            continue
+
+        for hidden in c:
+            for other in c:
+                if (hidden != other):
+                    diff = abs(deck.index(hidden) - deck.index(other))
+                    if diff < min_diff:
+                        min_diff = diff
+                        cardh = [hidden, other]
+    
+    cardh = [cards.index(card) for card in cardh]
 
     #Figure out which card needs to be hidden and what number to encode
     hidden, other, encode = outputFirstCard(cnumbers, cardh, cards)
@@ -76,7 +90,7 @@ def random_card(number):
 #Given 5 cards, Assistant hides an appropriate card
 #He/she reads out the remaining four cards after choosing their order carefully!
 def AssistantOrdersCards():
-    BaseAsistant(ask_for_card)
+    BaseAssistant(ask_for_card)
 
 
 #This procedure figures out which card should be hidden based on the distance
@@ -152,7 +166,7 @@ def ComputerAssistant():
         number = int(input('Please give random number' +
                                ' of at least 6 digits:'))
 
-    hidden_card = BaseAsistant(random_card(number))
+    hidden_card = BaseAssistant(random_card(number))
 
     guess = input('What is the hidden card?')
     if guess == hidden_card:
