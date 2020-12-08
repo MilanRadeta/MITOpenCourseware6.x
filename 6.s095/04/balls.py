@@ -15,6 +15,7 @@ def howHardIsTheCrystal(n, d):
 
     numDrops = 0
     floorNoBreak = [0] * d
+    ball_i = 1
     for i in range(d):
         #Begin phase i
         for j in range(r-1):
@@ -25,11 +26,12 @@ def howHardIsTheCrystal(n, d):
             if Floor > n:
                 floorNoBreak[i] -= 1
                 break
-            print ('Drop ball', i+1, 'from Floor', Floor)
-            yes = input('Did the ball break (yes/no)?:')
+            print ('Drop ball', ball_i, 'from Floor', Floor)
+            yes = input('Did the ball break (yes/no)?:').lower()
             numDrops += 1
-            if yes == 'yes':
+            if yes in ('yes', 'y'):
                 floorNoBreak[i] -= 1
+                ball_i += 1
                 break
 
 
@@ -42,9 +44,10 @@ def howHardIsTheCrystal(n, d):
 def convertToDecimal(r, d, rep):
     number = 0
     for i in range(d-1):
-        number = (number + rep[i]) * r
-    number += rep[d-1]
+        number += rep[i]
+        number *= r
+    number += rep[-1]
 
     return number
 
-    
+howHardIsTheCrystal(128, 6)
