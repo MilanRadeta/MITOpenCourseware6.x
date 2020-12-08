@@ -30,6 +30,27 @@ def bestTimeToPartySmart(schedule, ystart = 0, yend = 24):
     print('Best time to attend the party is at', time,
           'o\'clock', ':', maxcount, 'celebrities will be attending!')
 
+def bestTimeToPartyIntersection(schedule):
+    # Convert schedule to list of start times and end times marked as such
+    best_count = 0
+    best_time = None
+    for t in schedule:
+        if t == schedule[0]:
+            continue
+
+        count = 1
+        for t2 in schedule:
+            if t != t2 and t2[0] <= t[0] < t2[1]:
+                count += 1
+        
+        if count > best_count:
+            best_time = t[0]
+            best_count = count
+
+    # Output best time to party
+    print('Best time to attend the party is at', best_time,
+          'o\'clock', ':', best_count, 'celebrities will be attending!')
+
 
 # Sort the elements of tlist in ascending order
 # Sorting is based on the value of the element tuple (both items!)
@@ -67,3 +88,6 @@ bestTimeToPartySmart(sched3)
 bestTimeToPartySmart(sched,  9, 10)
 bestTimeToPartySmart(sched2, 9, 10)
 bestTimeToPartySmart(sched3, 9, 10)
+bestTimeToPartyIntersection(sched)
+bestTimeToPartyIntersection(sched2)
+bestTimeToPartyIntersection(sched3)
