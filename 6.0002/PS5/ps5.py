@@ -406,14 +406,10 @@ def calc_daily_city_temps(climate, city, years, day=10, month=1):
 
 if __name__ == '__main__':
     # Part A.4
-    # TODO: replace this line with your code
     degs = [1]
     climate = Climate(root_folder + '/data.csv')
-    years = pylab.array(TRAINING_INTERVAL)
-    total_days = {}
-    for year in years:
-        total_days[year] = 366 if year % 4 == 0 else 365
 
+    years = pylab.array(TRAINING_INTERVAL)
     temps = calc_daily_city_temps(climate, 'NEW YORK', years)
     models = generate_models(years, temps, degs)
     evaluate_models_on_training(years, temps, models)
@@ -433,8 +429,8 @@ if __name__ == '__main__':
     evaluate_models_on_training(years, temps, models)
 
     # Part D.2
-    # temps = gen_cities_avg(climate, CITIES, years)
-    # temps = moving_average(temps, 5)
+    temps = gen_cities_avg(climate, CITIES, years)
+    temps = moving_average(temps, 5)
     degs = [1, 2, 20]
     models = generate_models(years, temps, degs)
     evaluate_models_on_training(years, temps, models)
@@ -445,4 +441,9 @@ if __name__ == '__main__':
     evaluate_models_on_testing(years, temps, models)
 
     # Part E
-    # TODO: replace this line with your code
+    degs = [1]
+    years = pylab.array(TRAINING_INTERVAL)
+    temps = gen_std_devs(climate, CITIES, years)
+    temps = moving_average(temps, 5)
+    models = generate_models(years, temps, degs)
+    evaluate_models_on_training(years, temps, models)
