@@ -235,13 +235,16 @@ def evaluate_models_on_training(x, y, models):
     """
     for model in models:
         estimated = pylab.polyval(model, x)
+
         n = len(model) - 1
         r2 = r_squared(y, estimated)
         seos = se_over_slope(x, y, estimated, model) if n <= 1 else None
+
         title = 'n=%d' % n
         title += ', R^2=%.4f' % r2
         if seos is not None:
             title += ', SE/slope=%.4f' % seos
+
         plot_data_and_estimation(x, y, estimated, title)
 
 
@@ -260,8 +263,12 @@ def gen_cities_avg(climate, multi_cities, years):
         this array corresponds to the average annual temperature over the given
         cities for a given year.
     """
-    avg_per_city = pylab.array([calc_avg_city_annual_temps(
-        climate, city, years) for city in multi_cities])
+    avg_per_city = []
+    for city in multi_cities:
+        temps = calc_avg_city_annual_temps(climate, city, years)
+        avg_per_city.append(temps)
+
+    avg_per_city = pylab.array(avg_per_city)
     return sum(avg_per_city) / len(avg_per_city)
 
 
@@ -279,17 +286,15 @@ def moving_average(y, window_length):
         an 1-d pylab array with the same length as y storing moving average of
         y-coordinates of the N sample points
     """
-    return pylab.array([
-        sum(
-            y[
-                max(0, i - window_length + 1):
-                i + 1
-            ]
-        )
-        /
-        min(i + 1, window_length)
-        for i in range(len(y))
-    ])
+    result = []
+    for i in range(len(y)):
+        start = max(0, i - window_length + 1)
+        end = i + 1
+        sum_years = sum(y[start:end])
+        n = min(i + 1, window_length)
+        result.append(sum_years / n)
+
+    return pylab.array(result)
 
 
 def rmse(y, estimated):
@@ -323,8 +328,20 @@ def gen_std_devs(climate, multi_cities, years):
         this array corresponds to the standard deviation of the average annual
         city temperatures for the given cities in a given year.
     """
-    # TODO
-    pass
+    national_annual_temps = gen_cities_avg(climate, multi_cities, years)
+
+    stds = []
+    for i in range(len(years)):
+        year = years[i]
+        temps_per_cities = pylab.array(
+            [climate.get_yearly_temp(city, year) for city in multi_cities])
+        avg_yearly_temps = sum(temps_per_cities) / len(multi_cities)
+
+        diffs = (avg_yearly_temps - national_annual_temps[i]) ** 2
+        std = (sum(diffs) / len(avg_yearly_temps)) ** (1/2)
+
+        stds.append(std)
+    return pylab.array(stds)
 
 
 def evaluate_models_on_testing(x, y, models):
@@ -360,24 +377,26 @@ def evaluate_models_on_testing(x, y, models):
         plot_data_and_estimation(x, y, estimated, title)
 
 
-def total_days_in_year(year):
-    return 366 if year % 4 == 0 else 365
-
-
-def calc_annual_temp(temps, year):
-    return sum(temps) / total_days_in_year(year)
-
-
-def calc_avg_city_annual_temp(climate, city, year):
-    return calc_annual_temp(climate.get_yearly_temp(city, year), year)
-
-
 def calc_avg_city_annual_temps(climate, city, years):
-    return [calc_avg_city_annual_temp(climate, city, year) for year in years]
+    result = []
+    for year in years:
+        yearly_temp = climate.get_yearly_temp(city, year)
+        if year % 4 == 0:
+            annual_temp = sum(yearly_temp) / 366
+        else:
+            annual_temp = sum(yearly_temp) / 365
+        result.append(annual_temp)
+    return pylab.array(result)
 
 
 def calc_daily_city_temps(climate, city, years, day=10, month=1):
-    return pylab.array([climate.get_daily_temp(city, month, day, year) for year in years])
+    result = []
+
+    for year in years:
+        temps = climate.get_daily_temp(city, month, day, year)
+        result.append(temps)
+
+    return pylab.array(result)
 
 
 if __name__ == '__main__':
@@ -409,7 +428,16 @@ if __name__ == '__main__':
     evaluate_models_on_training(years, temps, models)
 
     # Part D.2
-    # TODO: replace this line with your code
+    # temps = gen_cities_avg(climate, CITIES, years)
+    # temps = moving_average(temps, 5)
+    degs = [1, 2, 20]
+    models = generate_models(years, temps, degs)
+    evaluate_models_on_training(years, temps, models)
+
+    years = pylab.array(TESTING_INTERVAL)
+    temps = gen_cities_avg(climate, CITIES, years)
+    temps = moving_average(temps, 5)
+    evaluate_models_on_testing(years, temps, models)
 
     # Part E
     # TODO: replace this line with your code
