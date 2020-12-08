@@ -333,11 +333,16 @@ def gen_std_devs(climate, multi_cities, years):
     stds = []
     for i in range(len(years)):
         year = years[i]
-        temps_per_cities = pylab.array(
-            [climate.get_yearly_temp(city, year) for city in multi_cities])
-        avg_yearly_temps = sum(temps_per_cities) / len(multi_cities)
+        annual_temp = national_annual_temps[i]
 
-        diffs = (avg_yearly_temps - national_annual_temps[i]) ** 2
+        temps_per_cities = []
+        for city in multi_cities:
+            temps = climate.get_yearly_temp(city, year)
+            temps_per_cities.append(temps)
+        temps_per_cities = pylab.array(temps_per_cities)
+
+        avg_yearly_temps = sum(temps_per_cities) / len(multi_cities)
+        diffs = (avg_yearly_temps - annual_temp) ** 2
         std = (sum(diffs) / len(avg_yearly_temps)) ** (1/2)
 
         stds.append(std)
