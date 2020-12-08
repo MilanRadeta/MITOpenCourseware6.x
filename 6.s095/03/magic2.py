@@ -9,8 +9,9 @@
 from itertools import permutations
 
 suits = ['C', 'D', 'H', 'S']
-ranks = ['A'] + list(range(2, 11)) + ['J', 'Q', 'K']
-deck = ['%s_%s' % (rank, s) for rank in ranks for s in suits]
+ranks = ['A'] + [str(i) for i in range(2, 11)] + ['J', 'Q', 'K']
+separator = '_'
+deck = ['%s%s%s' % (rank, separator, s) for rank in ranks for s in suits]
 
 def BaseAsistant(card_fun):
     print ('Cards are character strings as shown below.')
@@ -21,16 +22,24 @@ def BaseAsistant(card_fun):
     numsuits = [0, 0, 0, 0]
     pairsuit = None
 
+    d = deck.copy()
     #Take cards as input from user/audience
     #Various data structures are filled in
     for i in range(5):
-        n = card_fun(i)
-        print(n)
-        suit = n % 4
-        cards.append(deck[n])
-        cind.append(n)
+        n = card_fun(i, d)
+        card = d[n]
+        d.remove(card)
+
+        parts = card.split(separator)
+        rank = parts[0]
+        rank = ranks.index(rank)
+        suit = parts[1]
+        suit = suits.index(suit)
+
+        cards.append(card)
+        cind.append(deck.index(card))
         cardsuits.append(suit)
-        cnumbers.append(n // 4)
+        cnumbers.append(rank)
         numsuits[suit] += 1
         if numsuits[suit] > 1:
             pairsuit = suit
@@ -51,13 +60,13 @@ def BaseAsistant(card_fun):
 
     return cards[hidden]
 
-def ask_for_card(i):
+def ask_for_card(i, deck):
     print ('Please give card', i+1, end = ' ')
     card = input('in above format:')
     return deck.index(card)
 
 def random_card(number):
-    def return_card(i):
+    def return_card(i, deck):
         nonlocal number
         number = number * (i + 1) // (i + 2)
         return number % len(deck)
