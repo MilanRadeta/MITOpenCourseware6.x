@@ -12,6 +12,14 @@ def howHardIsTheCrystal(n, d):
     while (r**d <= n):
         r = r + 1
     print('Radix chosen is', r)
+    
+    old_d = d
+    #See if you can reduce d
+    while (r**d > n):
+        d -= 1
+    d += 1
+    if d < old_d:
+        print ('Using only', d, 'balls')
 
     numDrops = 0
     floorNoBreak = [0] * d
