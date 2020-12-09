@@ -43,6 +43,7 @@ T = [
     [10, 13, 14, 17, 24],
     [18, 21, 23,26 ,30 ],
 ]
+
 for i in range(len(T)):
     for j in range(len(T[i])):
         result = search(T, T[i][j])
