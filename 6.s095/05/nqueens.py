@@ -66,6 +66,7 @@ def NQueens(n = 8, maxSolutions = None, locations = None):
             col_diff = -1
             col += col_diff
         
+    print("Solutions:", len(result))
     print()
     return result
                 
@@ -78,6 +79,6 @@ def printBoard(board, n):
     print()
 
 # NQueens(n=4)
-# NQueens()
+NQueens()
 # NQueens(maxSolutions=3)
-NQueens(locations=[-1, 4, -1, -1, -1, -1, -1, 0])
+# NQueens(locations=[-1, 4, -1, -1, -1, -1, -1, 0])
