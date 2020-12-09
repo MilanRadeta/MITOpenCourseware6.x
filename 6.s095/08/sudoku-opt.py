@@ -38,23 +38,27 @@ def makeImplications(grid, i, j, e):
     grid[i][j] = e
     impl = [(i, j, e)]
 
-    for sector in sectors:
+    made_changes = True
+    while made_changes:
+        made_changes = False
+        for sector in sectors:
 
-        sectinfo = getSectorInfo(grid, sector)
+            sectinfo = getSectorInfo(grid, sector)
 
-        for sin in sectinfo:
-            #find the set of elements on the row/column corresponding to sin and remove them
-            coords = [(sin[0],y) for y in range(sudoku_size)]
-            coords.extend([(x,sin[1]) for x in range(sudoku_size)])
-            usedVals = findUsedValues(grid, coords)
-            left = sin[2].difference(usedVals)
-                         
-            #check if the vset is a singleton
-            if len(left) == 1:
-                val = left.pop()
-                if isValid(grid, sin[0], sin[1], val):
-                    grid[sin[0]][sin[1]] = val
-                    impl.append((sin[0], sin[1], val))
+            for sin in sectinfo:
+                #find the set of elements on the row/column corresponding to sin and remove them
+                coords = [(sin[0],y) for y in range(sudoku_size)]
+                coords.extend([(x,sin[1]) for x in range(sudoku_size)])
+                usedVals = findUsedValues(grid, coords)
+                left = sin[2].difference(usedVals)
+                            
+                #check if the vset is a singleton
+                if len(left) == 1:
+                    made_changes = True
+                    val = left.pop()
+                    if isValid(grid, sin[0], sin[1], val):
+                        grid[sin[0]][sin[1]] = val
+                        impl.append((sin[0], sin[1], val))
                 
     return impl
 
