@@ -15,43 +15,10 @@ def noConflicts(board, current):
         if (current - i == abs(board[current] - board[i])):
             return False
     return True 
-    
-def NQueens(n = 8, maxSolutions = None):
-    result = []
-    board = [-1] * n
-    col = 0
-    solutions_count = 0
-    while col >= 0:
-        board[col] += 1
-        if board[col] >= n:
-            board[col] = -1
-            col -= 1
-            continue
-        
-        if noConflicts(board, col):
-            if col == n - 1:
-                print(board)
-                # printBoard(board, n)
-                result.append(board.copy())
-                solutions_count += 1
-                if maxSolutions is not None and solutions_count >= maxSolutions:
-                    return result
-            else:
-                col += 1
-    return result
-                
-
-def printBoard(board, n):
-    for i in range(n):
-        for j in range(n):
-            print('0' if board[j] != i else '1', end=' ')
-        print()
-    print()
-
 
 #This procedure places 8 Queens on a board so they don't conflict.
 #It assumes n = 8 and won't work with other n!
-def EightQueens(n=8, maxSolutions=None):
+def EightQueens(n=8, maxSolutions=None, locations=[]):
     result = []
     board = [-1] * n
     solutions_count = 0
@@ -93,8 +60,4 @@ def EightQueens(n=8, maxSolutions=None):
     return result
 
 # EightQueens()
-# NQueens(5)
-# print(EightQueens() == NQueens(8))
-EightQueens(8, 3)
-print()
-NQueens(8, 3)
+EightQueens(maxSolutions=3)
