@@ -8,12 +8,8 @@
 #This procedure returns a new sorted list containing the same elements as L.
 #L is not modified.
 def mergeSort(L):
-
-    if len(L) == 2:
-        if L[0] <= L[1]:
-            return [L[0], L[1]]
-        else:
-            return [L[1], L[0]]
+    if len(L) <= 1:
+        return L
     else:
         middle = len(L)//2
         left = mergeSort(L[:middle])
@@ -40,8 +36,8 @@ def merge(left, right):
     return result
 
 
-inp = [23, 3, 45, 7, 6, 11, 14, 12]
-
+inp = [23, 3, 45, 7, 6, 11, 14]
+print(mergeSort(inp))
 
 
 
