@@ -16,18 +16,39 @@ def noConflicts(board, current):
             return False
     return True 
     
-def NQueens(n = 8, maxSolutions = None):
+def NQueens(n = 8, maxSolutions = None, locations = None):
+
     result = []
     board = [-1] * n
     col = 0
     solutions_count = 0
-    while col >= 0:
-        board[col] += 1
-        if board[col] >= n:
-            board[col] = -1
-            col -= 1
-            continue
+
+    if locations is None or len(locations) == 0:
+        locations = None
         
+    if locations is not None:
+        locations = locations.copy()
+        while len(locations) < n:
+            locations.append(0)
+            
+        while(col < n):
+            board[col] = locations[col]
+            col += 1
+        col = 0
+
+    col_diff = 1
+    while col >= 0:
+        skip_column = locations is not None and locations[col] >= 0
+        if not skip_column:
+            board[col] += 1
+            col_diff = 1
+
+            if board[col] >= n:
+                board[col] = -1
+                col_diff = -1
+                col += col_diff
+                continue
+
         if noConflicts(board, col):
             if col == n - 1:
                 print(board)
@@ -35,9 +56,17 @@ def NQueens(n = 8, maxSolutions = None):
                 result.append(board.copy())
                 solutions_count += 1
                 if maxSolutions is not None and solutions_count >= maxSolutions:
-                    return result
+                    break
+                if skip_column:
+                    col_diff = -1
+                    col += col_diff
             else:
-                col += 1
+                col += col_diff
+        elif skip_column:
+            col_diff = -1
+            col += col_diff
+        
+    print()
     return result
                 
 
@@ -48,5 +77,7 @@ def printBoard(board, n):
         print()
     print()
 
-# NQueens(5)
-NQueens(8, 3)
+# NQueens(n=4)
+# NQueens()
+# NQueens(maxSolutions=3)
+NQueens(locations=[-1, 4, -1, -1, -1, -1, -1, 0])
