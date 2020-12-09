@@ -15,11 +15,40 @@ def noConflicts(board, current):
         if (current - i == abs(board[current] - board[i])):
             return False
     return True 
+    
+def NQueens(n = 8):
+    result = []
+    board = [-1] * n
+    col = 0
+    while col >= 0:
+        board[col] += 1
+        if board[col] >= n:
+            board[col] = -1
+            col -= 1
+            continue
+        
+        if noConflicts(board, col):
+            if col == n - 1:
+                print(board)
+                printBoard(board, n)
+                result.append(board.copy())
+            else:
+                col += 1
+    return result
+                
+
+def printBoard(board, n):
+    for i in range(n):
+        for j in range(n):
+            print('0' if board[j] != i else '1', end=' ')
+        print()
+    print()
 
 
 #This procedure places 8 Queens on a board so they don't conflict.
 #It assumes n = 8 and won't work with other n!
 def EightQueens(n=8):
+    result = []
     board = [-1] * n
     for i in range(n):
         board[0] = i
@@ -51,8 +80,10 @@ def EightQueens(n=8):
                                     board[7] = q
                                     if noConflicts(board, 7):
                                         print (board)
-    return
+                                        result.append(board.copy())
+    
+    return result
 
-
-EightQueens()
-
+# EightQueens()
+NQueens(8)
+# print(EightQueens() == NQueens(8))
