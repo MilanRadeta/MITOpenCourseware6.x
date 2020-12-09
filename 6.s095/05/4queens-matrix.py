@@ -41,14 +41,20 @@ def printBoard(board):
         print(line)
     print()
 
+def initBoard(n):
+    line = [0] * n
+    board = []
+    for i in range(n):
+        board.append(line.copy())
+    return board
+
+
 #This procedure places 4 Queens on a board so they don't conflict
 #It assumes n = 4 and won't work with other n!
 def FourQueens(n=4):
     #Initialize the board to be empty
-    board = [ [0, 0, 0, 0],
-              [0, 0, 0, 0],
-              [0, 0, 0, 0],
-              [0, 0, 0, 0] ]
+    board = initBoard(n)
+
 
     #Place a queen a column at a time beginning with leftmost column
     for i in range(n):
