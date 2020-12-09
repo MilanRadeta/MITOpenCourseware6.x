@@ -8,7 +8,7 @@
 def nQueens(size):
     board = [-1] * size
     rQueens(board, 0, size)
-    print (board)
+    printBoard (board)
 
 #This procedure checks that the most recently placed queen on column current
 #does not conflict with queens in columns to the left.
@@ -35,6 +35,14 @@ def rQueens(board, current, size):
                 if (done):
                     return True
         return False
+  
 
+def printBoard(board):
+    n = len(board)
+    for i in range(n):
+        for j in range(n):
+            print('.' if board[j] != i else 'Q', end=' ')
+        print()
+    print()
 
 nQueens(20)
