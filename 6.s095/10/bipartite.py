@@ -10,7 +10,27 @@
 from graphs import all_graphs
 
 def bipartiteGraphColor(graph, start=None, coloring=None, colors=None):
+    if colors is None:
+        colors = [1,2]
 
+    if coloring is None:
+        coloring = {}
+
+    if start not in graph:
+        start = list(graph.keys())[0]
+
+    result = True
+    for key in graph:
+        if key not in coloring:
+            result, coloring = colorGraph(graph, key, coloring, colors)
+            if not result:
+                break
+    
+    return result, coloring
+    
+
+
+def colorGraph(graph, start=None, coloring=None, colors=None):
     if colors is None:
         colors = [1,2]
 
@@ -28,12 +48,15 @@ def bipartiteGraphColor(graph, start=None, coloring=None, colors=None):
     else:
         return True, coloring
     
+    colors = list(reversed(colors))
+
     for vertex in graph[start]:
-        val, coloring = bipartiteGraphColor(graph, vertex, coloring, list(reversed(colors)))
+        val, coloring = colorGraph(graph, vertex, coloring, colors)
         if val == False:
             return False, {}
         
     return True, coloring
 
 for g in all_graphs:
+    print(g)
     print (bipartiteGraphColor(g))

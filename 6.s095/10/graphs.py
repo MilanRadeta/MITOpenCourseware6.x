@@ -26,4 +26,14 @@ grap = {'A': ['B', 'D'],
         'C': ['D', 'B'],
         'D': ['A', 'C']}
 
-all_graphs = [gra3, graph, graph2, grap]
+disgr = {'A': ['B'],
+         'B': ['A'],
+         'C': ['D'],
+         'E': ['D'],
+         'F': ['D', 'G', 'H', 'I'],
+         'D': ['C', 'E', 'F'],
+         'G': ['F'],
+         'H': ['F'],
+         'I': ['F']}
+
+all_graphs = [gra3, graph, graph2, grap, disgr]
