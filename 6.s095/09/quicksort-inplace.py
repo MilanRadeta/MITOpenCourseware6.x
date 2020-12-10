@@ -13,8 +13,10 @@ def pivotPartitionClever(lst, start, end):
     limits = [start - 1, end]
     i, j, diff = 0, 1, 1
     count = 0
+    loops = 0
 
     while True: 
+        loops += 1
         limits[i] += diff
         if limits[i] == limits[j]:
             break
@@ -29,25 +31,33 @@ def pivotPartitionClever(lst, start, end):
 
     lst[limits[0]] = pivot 
 
-    return limits[0], count
+    return limits[0], count, loops
 
 
 def quicksort(lst, start, end):
-    count = 0
+    count, count1, count2 = 0, 0, 0
+    loops, loops1, loops2 = 0, 0, 0
     if start < end: 
-        split, count = pivotPartitionClever(lst, start, end) 
-        count += quicksort(lst, start, split - 1)
-        count += quicksort(lst, split + 1, end)
-    return count
+        split, count, loops = pivotPartitionClever(lst, start, end) 
+        count1, loops1 = quicksort(lst, start, split - 1)
+        count2, loops2 = quicksort(lst, split + 1, end)
+    return sum((count, count1, count2)), sum((loops, loops1, loops2))
     
 a = [4, 65, 2, -31, 0, 99, 83, 782, 1]
 b = [4, 4, 65, 2, -31, 0, 99, 83, -31, 782, 1]
+L = list(range(100))
+D = list(reversed(L))
+R = [0] * 100
+R[0] = 29
+for i in range(len(R)):
+    R[i] = (9679 * R[i-1] + 12637 * i) % 2287 
 
-arrs = [a,b]
+arrs = [a, b, L, D, R]
 for arr in arrs:
     print ('Initial list is:', arr)
-    count = quicksort(arr, 0, len(arr) - 1)
+    count, loops = quicksort(arr, 0, len(arr) - 1)
     print ('Sorted list is:', arr)
-    print ('Moves needed:', count)
+    print ('Moves performed:', count)
+    print ('Loops interated:', loops)
 
 
