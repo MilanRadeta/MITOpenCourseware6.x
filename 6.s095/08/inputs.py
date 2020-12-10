@@ -51,3 +51,12 @@ diff  = [[0,0,5,3,0,0,0,0,0],
 
 
 all_inputs = [input, inp2, inpd, hard, diff]
+
+def getInputs(inputs=all_inputs):
+    res = []
+    for i in inputs:
+        o = []
+        for row in i:
+            o.append(row.copy())
+        res.append(o)
+    return res
