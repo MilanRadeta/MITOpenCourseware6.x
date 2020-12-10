@@ -118,15 +118,44 @@ def solveSudoku(grid, makeInitImplications=False, findNextCellByImpl=False, chec
         undoImplications(grid, initimpl)
     return False, backtracks
 
+results = []
 for inp in all_inputs:
     inp = inp.copy()
-    solved, backtracks = solveSudoku(inp, makeInitImplications=True, findNextCellByImpl=True, checkDiags=False)
+    solved, backtracks = solveSudoku(inp)
     printSudoku(inp)
     print ('Backtracks = ', backtracks)
     print('-'*30)
+    results.append(inp)
+
+prevResults = results
+results = []
+for inp in all_inputs:
+    inp = inp.copy()
+    solved, backtracks = solveSudoku(inp, makeInitImplications=True)
+    printSudoku(inp)
+    print ('Backtracks = ', backtracks)
+    print('-'*30)
+    results.append(inp)
+
+if prevResults != results:
+    print("FAIL - makeInitImplications gives different result")
+    exit(-1)
+
+results = []
+for inp in all_inputs:
+    inp = inp.copy()
+    solved, backtracks = solveSudoku(inp, findNextCellByImpl=True)
+    printSudoku(inp)
+    print ('Backtracks = ', backtracks)
+    print('-'*30)
+    results.append(inp)
+
+if prevResults != results:
+    print("FAIL - findNextCellByImpl gives different result")
+    exit(-1)
 
 test = inpd.copy()
-solved, backtracks = solveSudoku(test, makeInitImplications=True, findNextCellByImpl=True, checkDiags=True)
+solved, backtracks = solveSudoku(test, findNextCellByImpl=True, checkDiags=True)
 printSudoku(test)
 print ('Backtracks = ', backtracks)
 print('-'*30)
