@@ -2,6 +2,11 @@
 sudoku_size = 9
 segment_size = sudoku_size // 3
 
+
+def getSectors():
+    intervals = [(i, i + segment_size) for i in range(0, sudoku_size, segment_size)]
+    return [[row[0], row[1], col[0], col[1]] for col in intervals for row in intervals]
+    
 #This procedure finds the next empty square to fill on the Sudoku grid
 def findNextCellToFill(grid):
     #Look for an unfilled grid location
@@ -23,12 +28,22 @@ def checkSegment(grid, i, j, e):
     return True
 
 #This procedure checks if setting the (i, j) square to e is valid
-def isValid(grid, i, j, e):
+def isValid(grid, i, j, e, checkDiags=False):
     rowOk = all([e != grid[i][x] for x in range(sudoku_size)])
     if rowOk:
         columnOk = all([e != grid[x][j] for x in range(sudoku_size)])
         if columnOk:
-            return checkSegment(grid, i, j, e)
+            if checkSegment(grid, i, j, e):
+                if checkDiags:
+                    if i == j:
+                        diagonalOk1 = all([e != grid[x][x] for x in range(sudoku_size)])
+                        if not diagonalOk1:
+                            return False
+                    if i == sudoku_size - j - 1:
+                        diagonalOk2 = all([e != grid[x][sudoku_size - x - 1] for x in range(sudoku_size)])
+                        if not diagonalOk2:
+                            return False
+                return True
     return False
 
 
