@@ -12,6 +12,7 @@ def pivotPartitionClever(lst, start, end):
     pivot = lst[end] 
     limits = [start - 1, end]
     i, j, diff = 0, 1, 1
+    count = 0
 
     while True: 
         limits[i] += diff
@@ -24,23 +25,29 @@ def pivotPartitionClever(lst, start, end):
             lst[limit], lst[other_limit] = lst[other_limit], lst[limit]
             i, j = j, i
             diff *= -1
+            count += 1
 
     lst[limits[0]] = pivot 
 
-    return limits[0]
+    return limits[0], count
 
 
 def quicksort(lst, start, end):
+    count = 0
     if start < end: 
-        split = pivotPartitionClever(lst, start, end) 
-        quicksort(lst, start, split - 1)
-        quicksort(lst, split + 1, end)
-    return
+        split, count = pivotPartitionClever(lst, start, end) 
+        count += quicksort(lst, start, split - 1)
+        count += quicksort(lst, split + 1, end)
+    return count
     
 a = [4, 65, 2, -31, 0, 99, 83, 782, 1]
-print ('Initial list is:', a)
-quicksort(a, 0, len(a) - 1)
-print ('Sorted list is:', a)
-
 b = [4, 4, 65, 2, -31, 0, 99, 83, -31, 782, 1]
+
+arrs = [a,b]
+for arr in arrs:
+    print ('Initial list is:', arr)
+    count = quicksort(arr, 0, len(arr) - 1)
+    print ('Sorted list is:', arr)
+    print ('Moves needed:', count)
+
 
