@@ -10,45 +10,29 @@
 #It only uses one element worth of additional storage for the pivot!
 def pivotPartitionClever(lst, start, end):
     pivot = lst[end] 
-    bottom = start - 1       
-    top = end
+    limits = [start - 1, end]
+    i, j, diff = 0, 1, 1
 
-    done = False
-    while not done: 
+    while True: 
+        limits[i] += diff
+        if limits[i] == limits[j]:
+            break
+        
+        limit, other_limit = limits[i], limits[j]
 
-        while not done:
-            #Move rightward from left searching for element > pivot
-            bottom += 1 
-            if bottom == top: 
-                done = True 
-                break
-            if lst[bottom] > pivot: 
-                lst[top] = lst[bottom] 
-                #print (lst, 'bottom =', bottom, 'top = ', top)
-                break 
+        if (lst[limit] - pivot) * diff > 0:
+            lst[limit], lst[other_limit] = lst[other_limit], lst[limit]
+            i, j = j, i
+            diff *= -1
 
-        while not done:
-            #Move leftward from right searching for element < pivot
-            top -= 1
-            if top == bottom: 
-                done = True 
-                break
-            if lst[top] < pivot: 
-                lst[bottom] = lst[top] 
-                #print (lst, 'bottom =', bottom, 'top = ', top)
-                break 
+    lst[limits[0]] = pivot 
 
-    lst[top] = pivot 
-    #print (lst)
-    return top 
+    return limits[0]
 
 
 def quicksort(lst, start, end):
     if start < end: 
-        #print ('Partition start: bottom =', start - 1, 'top = ', end)
-        #print (lst)
         split = pivotPartitionClever(lst, start, end) 
-        #print ('Partition end')
         quicksort(lst, start, split - 1)
         quicksort(lst, split + 1, end)
     return
