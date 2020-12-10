@@ -34,7 +34,9 @@ def pivotPartitionClever(lst, start, end):
     return limits[0], count, loops
 
 
-def quicksort(lst, start, end):
+def quicksort(lst, start=0, end=None):
+    if end is None:
+        end = len(lst) - 1
     count, count1, count2 = 0, 0, 0
     loops, loops1, loops2 = 0, 0, 0
     if start < end: 
@@ -42,20 +44,37 @@ def quicksort(lst, start, end):
         count1, loops1 = quicksort(lst, start, split - 1)
         count2, loops2 = quicksort(lst, split + 1, end)
     return sum((count, count1, count2)), sum((loops, loops1, loops2))
+
+def quickselect(lst, k, start=0, end=None):
+    if end is None:
+        end = len(lst) - 1
+    if start < end: 
+        split, count, loops = pivotPartitionClever(lst, start, end) 
+        if k < split:
+            return quickselect(lst, k, start, split - 1)
+        if k > split:
+            return quickselect(lst, k, split + 1, end)
+        
+    return lst[k]
     
 a = [4, 65, 2, -31, 0, 99, 83, 782, 1]
 b = [4, 4, 65, 2, -31, 0, 99, 83, -31, 782, 1]
-L = list(range(100))
+L = list(range(100))    # n(n + 1) // 2
 D = list(reversed(L))
 R = [0] * 100
 R[0] = 29
 for i in range(len(R)):
     R[i] = (9679 * R[i-1] + 12637 * i) % 2287 
+k = 5
 
 arrs = [a, b, L, D, R]
 for arr in arrs:
     print ('Initial list is:', arr)
-    count, loops = quicksort(arr, 0, len(arr) - 1)
+
+    kelem = quickselect(arr, k)
+    print (f'k-th smallest element for k={k + 1}: {kelem}')
+
+    count, loops = quicksort(arr)
     print ('Sorted list is:', arr)
     print ('Moves performed:', count)
     print ('Loops interated:', loops)
