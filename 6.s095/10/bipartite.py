@@ -7,37 +7,20 @@
 #The code determines if a graph is bipartite or not. If the graph can be colored
 #using two colors, it is bipartite, else it is not.
 
-graph = {'B': ['C'],
-         'C': ['B', 'D'],
-         'D': ['C', 'E', 'F'],
-         'E': ['D'],
-         'F': ['D', 'G', 'H', 'I'],
-         'G': ['F'],
-         'H': ['F'],
-         'I': ['F']}
+from graphs import all_graphs
 
-graph2 = {'F': ['D', 'I', 'G', 'H'],
-         'B': ['C'],
-         'D': ['C', 'E', 'F'],
-         'E': ['D'],
-         'H': ['F'],
-         'C': ['D', 'B'],
-         'G': ['F'],
-         'I': ['F']}
+def bipartiteGraphColor(graph, start=None, coloring=None, colors=None):
 
-gra3 = {'A': ['B', 'C'],
-        'B': ['A', 'C'],
-        'C': ['A', 'B']}
+    if colors is None:
+        colors = [1,2]
 
-grap = {'A': ['B', 'D'],
-        'B': ['C', 'A'],
-        'C': ['D', 'B'],
-        'D': ['A', 'C']}
+    if coloring is None:
+        coloring = {}
 
-def bipartiteGraphColor(graph, start, coloring, color):
     if start not in graph:
-        return False, {}
+        start = list(graph.keys())[0]
     
+    color = colors[0]
     if start not in coloring:
         coloring[start] = color
     elif coloring[start] != color:
@@ -45,19 +28,12 @@ def bipartiteGraphColor(graph, start, coloring, color):
     else:
         return True, coloring
     
-    if color == 'Sha':
-        newcolor = 'Hat'
-    else:
-        newcolor = 'Sha'
-        
     for vertex in graph[start]:
-        val, coloring = bipartiteGraphColor(graph, vertex, coloring, newcolor)
+        val, coloring = bipartiteGraphColor(graph, vertex, coloring, list(reversed(colors)))
         if val == False:
             return False, {}
         
     return True, coloring
 
-print (bipartiteGraphColor(gra3, 'A', {}, 'Sha'))
-print (bipartiteGraphColor(graph, 'B', {}, 'Sha'))
-print (bipartiteGraphColor(graph2, 'B', {}, 'Sha'))
-print (bipartiteGraphColor(grap, 'A', {}, 'Sha'))
+for g in all_graphs:
+    print (bipartiteGraphColor(g))
