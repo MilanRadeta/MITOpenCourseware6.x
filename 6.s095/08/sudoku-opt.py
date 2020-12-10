@@ -2,7 +2,7 @@
 #You Will Never Want to Play Sudoku Again
 #Given a partially filled in Sudoku board, complete the puzzle
 #obeying the rules of Sudoku
-from inputs import all_inputs, inpd, getInputs
+from inputs import inpd, even, getInputs
 from utils import sudoku_size, getSectors, findNextCellToFill, isValid, printSudoku
 
 #x varies from entry1 to entry2 - 1, y varies from entry3 to entry4 - 1 
@@ -21,13 +21,15 @@ def getSectorInfo(grid, sector):
     #attach copy of vset to each missing square in ith sector
     for x in range(sector[0], sector[1]):
         for y in range(sector[2], sector[3]):
-            if grid[x][y] <= 0:
+            if grid[x][y] == 0:
                 sectinfo.append([x, y, vset.copy()])
+            elif grid[x][y] == -2:
+                sectinfo.append([x, y, {v for v in vset if v % 2 == 0}])
     
     return sectinfo
 
 def findUsedValues(grid, coords):
-    return set([grid[x][y] for x, y in coords if grid[x][y] > 0])
+    return {grid[x][y] for x, y in coords if grid[x][y] > 0}
 
 #This procedure makes implications based on existing numbers on squares
 def makeImplications(grid, i, j, e, checkDiags=False):
@@ -89,9 +91,9 @@ def undoImplications(grid, impls):
 #This procedure fills in the missing squares of a Sudoku puzzle
 #obeying the Sudoku rules by guessing when it has to and performing
 #implications when it can
-def solveSudoku(grid, i=-1, j=-1, e=0, backtracks=0, checkDiags=False, evens=None):
+def solveSudoku(grid, i=-1, j=-1, e=0, backtracks=0, checkDiags=False):
     initimpl, next_cell = makeImplications(grid, i, j, e, checkDiags=checkDiags)
-
+    
     #find the next empty cell to fill
     i, j, vals = next_cell
     
@@ -100,13 +102,15 @@ def solveSudoku(grid, i=-1, j=-1, e=0, backtracks=0, checkDiags=False, evens=Non
 
     for e in range(sudoku_size):
         e += 1
+        if grid[i][j] == -2 and e % 2 == 1:
+            continue
+
         #Try different values in i, j location
         if isValid(grid, i, j, e, checkDiags=checkDiags):
 
             solved, backtracks = solveSudoku(
                 grid, i=i, j=j, e=e, backtracks=backtracks,
-                checkDiags=checkDiags, 
-                evens=evens)
+                checkDiags=checkDiags)
             if solved:
                 return True, backtracks
             #Undo the current cell for backtracking
@@ -124,8 +128,15 @@ for inp in getInputs():
     print('-'*30)
 
 print('Diagonal Sudoku')
-test = inpd.copy()
+test = getInputs([inpd])[0]
 solved, backtracks = solveSudoku(test, checkDiags=True)
+printSudoku(test)
+print ('Backtracks = ', backtracks)
+print('-'*30)
+
+print('Even Sudoku')
+test = getInputs([even])[0]
+solved, backtracks = solveSudoku(test)
 printSudoku(test)
 print ('Backtracks = ', backtracks)
 print('-'*30)
