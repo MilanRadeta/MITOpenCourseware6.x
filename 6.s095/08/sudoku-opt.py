@@ -15,13 +15,13 @@ def getSectorInfo(grid, sector):
     vset = set(range(1, sudoku_size + 1))
     for x in range(sector[0], sector[1]):
         for y in range(sector[2], sector[3]):
-            if grid[x][y] != 0:
+            if grid[x][y] > 0:
                 vset.remove(grid[x][y])
 
     #attach copy of vset to each missing square in ith sector
     for x in range(sector[0], sector[1]):
         for y in range(sector[2], sector[3]):
-            if grid[x][y] == 0:
+            if grid[x][y] <= 0:
                 sectinfo.append([x, y, vset.copy()])
     
     return sectinfo
@@ -33,8 +33,8 @@ def findUsedValues(grid, coords):
 def makeImplications(grid, i, j, e, checkDiags=False):
     impl = []
     if i >= 0 and j >= 0:
+        impl.append((i, j, grid[i][j]))
         grid[i][j] = e
-        impl.append((i, j, e))
 
     i, j = findNextCellToFill(grid)
     easiest_cell = (i, j, None)
@@ -64,8 +64,8 @@ def makeImplications(grid, i, j, e, checkDiags=False):
                 if len(left) == 1:
                     made_changes = True
                     val = left.pop()
+                    impl.append((sin[0], sin[1], grid[sin[0]][sin[1]]))
                     grid[sin[0]][sin[1]] = val
-                    impl.append((sin[0], sin[1], val))
                     
                     for other in sectinfo:
                         if val in other[2]:
@@ -82,7 +82,7 @@ def makeImplications(grid, i, j, e, checkDiags=False):
 #This procedure undoes all the implications
 def undoImplications(grid, impls):
     for imp in impls:
-        grid[imp[0]][imp[1]] = 0
+        grid[imp[0]][imp[1]] = imp[2]
     return
 
 
