@@ -2,7 +2,7 @@
 #You Will Never Want to Play Sudoku Again
 #Given a partially filled in Sudoku board, complete the puzzle
 #obeying the rules of Sudoku
-from inputs import all_inputs, inpd
+from inputs import all_inputs, inpd, getInputs
 from utils import sudoku_size, getSectors, findNextCellToFill, isValid, printSudoku
 
 #x varies from entry1 to entry2 - 1, y varies from entry3 to entry4 - 1 
@@ -55,6 +55,7 @@ def makeImplications(grid, i, j, e, checkDiags=False):
                         coords.extend([(i, i) for i in range(sudoku_size)])
                     if sin[0] == sudoku_size - sin[1] - 1:
                         coords.extend([(i, sudoku_size - i - 1) for i in range(sudoku_size)])
+
                 usedVals = findUsedValues(grid, coords)
                 left = sin[2].difference(usedVals)
                 sin[2] = left
@@ -63,9 +64,13 @@ def makeImplications(grid, i, j, e, checkDiags=False):
                 if len(left) == 1:
                     made_changes = True
                     val = left.pop()
-                    if isValid(grid, sin[0], sin[1], val, checkDiags):
-                        grid[sin[0]][sin[1]] = val
-                        impl.append((sin[0], sin[1], val))
+                    
+                    for other in sectinfo:
+                        if val in other[2]:
+                            other[2].remove(val)
+
+                    grid[sin[0]][sin[1]] = val
+                    impl.append((sin[0], sin[1], val))
                 elif easiest_cell[2] is None or len(easiest_cell[2]) > len(left):
                     easiest_cell = sin
 
@@ -82,14 +87,8 @@ def undoImplications(grid, impls):
 #This procedure fills in the missing squares of a Sudoku puzzle
 #obeying the Sudoku rules by guessing when it has to and performing
 #implications when it can
-def solveSudoku(grid, makeInitImplications=False, findNextCellByImpl=False, checkDiags=False, i=0, j=0, backtracks=0):
-    initimpl = None
-    next_cell = None
-    if findNextCellByImpl:
-        makeInitImplications = True
-
-    if makeInitImplications:
-        initimpl, next_cell = makeImplications(grid, -1, -1, 0, checkDiags)
+def solveSudoku(grid, i=-1, j=-1, e=0, backtracks=0, findNextCellByImpl=False, checkDiags=False, evens=None):
+    initimpl, next_cell = makeImplications(grid, i, j, e, checkDiags=checkDiags)
 
     #find the next empty cell to fill
     if findNextCellByImpl:
@@ -103,23 +102,24 @@ def solveSudoku(grid, makeInitImplications=False, findNextCellByImpl=False, chec
     for e in range(sudoku_size):
         e += 1
         #Try different values in i, j location
-        if isValid(grid, i, j, e, checkDiags):
+        if isValid(grid, i, j, e, checkDiags=checkDiags):
 
-            impl, sin = makeImplications(grid, i, j, e, checkDiags)
-            
-            solved, backtracks = solveSudoku(grid, makeInitImplications, findNextCellByImpl, checkDiags, i, j, backtracks)
+            solved, backtracks = solveSudoku(
+                grid, i=i, j=j, e=e, backtracks=backtracks,
+                findNextCellByImpl=findNextCellByImpl,
+                checkDiags=checkDiags, 
+                evens=evens)
             if solved:
                 return True, backtracks
             #Undo the current cell for backtracking
             backtracks += 1
-            undoImplications(grid, impl)
 
-    if makeInitImplications:
-        undoImplications(grid, initimpl)
+    undoImplications(grid, initimpl)
     return False, backtracks
 
+print('Default strategy')
 results = []
-for inp in all_inputs:
+for inp in getInputs():
     inp = inp.copy()
     solved, backtracks = solveSudoku(inp)
     printSudoku(inp)
@@ -128,21 +128,9 @@ for inp in all_inputs:
     results.append(inp)
 
 prevResults = results
+print('Get next cell by implications strategy')
 results = []
-for inp in all_inputs:
-    inp = inp.copy()
-    solved, backtracks = solveSudoku(inp, makeInitImplications=True)
-    printSudoku(inp)
-    print ('Backtracks = ', backtracks)
-    print('-'*30)
-    results.append(inp)
-
-if prevResults != results:
-    print("FAIL - makeInitImplications gives different result")
-    exit(-1)
-
-results = []
-for inp in all_inputs:
+for inp in getInputs():
     inp = inp.copy()
     solved, backtracks = solveSudoku(inp, findNextCellByImpl=True)
     printSudoku(inp)
@@ -154,6 +142,7 @@ if prevResults != results:
     print("FAIL - findNextCellByImpl gives different result")
     exit(-1)
 
+print('Diagonal Sudoku')
 test = inpd.copy()
 solved, backtracks = solveSudoku(test, findNextCellByImpl=True, checkDiags=True)
 printSudoku(test)
