@@ -12,7 +12,7 @@ def findNextCellToFill(grid):
     #Look for an unfilled grid location
     for x in range(sudoku_size):
         for y in range(sudoku_size):
-            if grid[x][y] == 0:
+            if grid[x][y] <= 0:
                 return x, y
     return -1, -1
 
