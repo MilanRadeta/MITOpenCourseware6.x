@@ -10,9 +10,7 @@
 #It uses using another list as auxiliary storage and returns the pivot
 def pivotPartition(lst, start, end):
     pivot = lst[end]
-    less = []
-    pivotList = []
-    more = []
+    less, pivotList, more = [], [], []
 
     for e in lst:
         if e < pivot:
@@ -22,19 +20,16 @@ def pivotPartition(lst, start, end):
         else:
             pivotList.append(e)
         
+    result = -1
     i = 0
-    for e in less:
-        lst[i] = e
-        i += 1
-    for e in pivotList:
-        lst[i] = e
-        i += 1
-    for e in more:
+    for e in less + pivotList + more:
+        if result < 0 and e == pivot:
+            result = i
         lst[i] = e
         i += 1
 
     #print ('Pivot element is: ', pivot)
-    return lst.index(pivot)
+    return result
 
 
 #This procedure sorts the list recursively using pivot-based partitioning
@@ -45,8 +40,6 @@ def quicksort(lst, start, end):
         #print (lst[start:end+1])
         quicksort(lst, start, split - 1)
         quicksort(lst, split + 1, end)
-    else:
-        return
     
 a = [4, 65, 2, -31, 0, 99, 83, 782, 1]
 print ('Initial list is:', a)
