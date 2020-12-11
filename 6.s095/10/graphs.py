@@ -36,4 +36,9 @@ disgr = {'A': ['B'],
          'H': ['F'],
          'I': ['F']}
 
-all_graphs = [gra3, graph, graph2, grap, disgr]
+cycgr = {'A': ['B', 'C', 'D'],
+         'B': ['C', 'A', 'B'],
+         'C': ['D', 'A', 'B'],
+         'D': ['A', 'B', 'C']}
+
+all_graphs = [gra3, graph, graph2, grap, disgr, cycgr]
