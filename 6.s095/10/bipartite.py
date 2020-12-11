@@ -16,7 +16,7 @@ def bipartiteGraphColor(graph, start=None, coloring=None, colors=None):
     if coloring is None:
         coloring = {}
 
-    if start not in graph:
+    if start is None:
         start = list(graph.keys())[0]
 
     previous = None
@@ -41,7 +41,7 @@ def colorGraph(graph, start=None, coloring=None, colors=None, previous=None):
     if coloring is None:
         coloring = {}
 
-    if start not in graph:
+    if start is None:
         start = list(graph.keys())[0]
     
     previous.append(start)
@@ -63,9 +63,34 @@ def colorGraph(graph, start=None, coloring=None, colors=None, previous=None):
         
     return True, coloring, None
 
+def findPath(graph, start=None, end=None, path=None):
+    if path is None:
+        path = []
+
+    if start is None:
+        start = list(graph.keys())[0]
+
+    if end is None:
+        end = list(graph.keys())[0]
+    
+    path.append(start)
+
+    if start == end:
+        return path
+
+    for vertex in graph[start]:
+        if vertex not in path:
+            val = findPath(graph, vertex, end, path.copy())
+            if val is not None:
+                return val
+        
+    return None
+
 for g in all_graphs:
-    print(g)
+    print('Graph:', g)
     val, coloring, cyclic = bipartiteGraphColor(g)
     if cyclic is not None:
         print('Here is a cyclic path that cannot be colored', cyclic)
-    print((val, coloring))
+    print('Bipartite:', (val, coloring))
+    print('Path from B to I:', findPath(g, 'B', 'I'))
+    print()
