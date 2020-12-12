@@ -27,6 +27,7 @@ def remove_vocals(sound):
 import io
 import wave
 import struct
+import os
 
 def load_wav(filename):
     """
@@ -62,6 +63,9 @@ def write_wav(sound, filename):
     sound into WAV format and save it as a file with the given filename (which
     can then be opened by most audio players)
     """
+    if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+            
     outfile = wave.open(filename, 'w')
     outfile.setparams((2, 2, sound['rate'], 0, 'NONE', 'not compressed'))
 
@@ -85,6 +89,9 @@ if __name__ == '__main__':
     # here is an example of loading a file (note that this is specified as
     # sounds/hello.wav, rather than just as hello.wav, to account for the
     # sound files being in a different directory than this file)
-    hello = load_wav('sounds/hello.wav')
-
-    # write_wav(backwards(hello), 'hello_reversed.wav')
+    folder = 'sounds'
+    output = 'reversed'
+    for sound in os.listdir(folder):
+        if '.wav' in sound:
+            res = load_wav('%s/%s' % (folder, sound))
+            write_wav(backwards(res), '%s/%s' % (output, sound))
