@@ -2,7 +2,7 @@
 
 
 def backwards(sound):
-    raise NotImplementedError
+    return {'rate': sound['rate'], 'left': list(reversed(sound['left'])), 'right': list(reversed(sound['right']))}
 
 
 def mix(sound1, sound2, p):
