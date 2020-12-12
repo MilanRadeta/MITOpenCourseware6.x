@@ -6,7 +6,15 @@ def backwards(sound):
 
 
 def mix(sound1, sound2, p):
-    raise NotImplementedError
+    if sound1['rate'] != sound2['rate']:
+        return None
+    
+    out_len = min(len(sound1['left']), len(sound2['left']))
+    
+    def mix_channel(channel):
+        return [p * sound1[channel][i] + (1 - p) * sound2[channel][i] for i in range(out_len)]
+    
+    return {'rate': sound1['rate'], 'left': mix_channel('left'), 'right': mix_channel('right')}
 
 
 def echo(sound, num_echos, delay, scale):
@@ -90,8 +98,16 @@ if __name__ == '__main__':
     # sounds/hello.wav, rather than just as hello.wav, to account for the
     # sound files being in a different directory than this file)
     folder = 'sounds'
-    output = 'reversed'
-    for sound in os.listdir(folder):
-        if '.wav' in sound:
-            res = load_wav('%s/%s' % (folder, sound))
-            write_wav(backwards(res), '%s/%s' % (output, sound))
+    # output = 'reversed'
+    # for sound in os.listdir(folder):
+    #     if '.wav' in sound:
+    #         res = load_wav('%s/%s' % (folder, sound))
+    #         write_wav(backwards(res), '%s/%s' % (output, sound))
+
+    output = 'mixes'
+    mix_sounds = [('chord', 'meow', 0.7), ('synth', 'water', 0.2)]
+
+    for sound in mix_sounds:
+        sound1 = load_wav('%s/%s.wav' % (folder, sound[0]))
+        sound2 = load_wav('%s/%s.wav' % (folder, sound[1]))
+        write_wav(mix(sound1, sound2, sound[2]), '%s/%s-and-%s.wav' % (output, sound[0], sound[1]))
