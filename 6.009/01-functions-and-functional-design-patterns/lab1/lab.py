@@ -8,29 +8,29 @@ from PIL import Image as Image
 
 
 def get_pixel(image, x, y):
-    return image['pixels'][x, y]
+    return image['pixels'][x * image['width'] + y]
 
 
 def set_pixel(image, x, y, c):
-    image['pixels'][x, y] = c
+    image['pixels'][x * image['width'] + y] = c
 
 
 def apply_per_pixel(image, func):
     result = {
         'height': image['height'],
-        'widht': image['width'],
-        'pixels': [],
+        'width': image['width'],
+        'pixels': image['pixels'].copy(),
     }
     for x in range(image['height']):
         for y in range(image['width']):
             color = get_pixel(image, x, y)
             newcolor = func(color)
-        set_pixel(result, y, x, newcolor)
+            set_pixel(result, x, y, newcolor)
     return result
 
 
 def inverted(image):
-    return apply_per_pixel(image, lambda c: 256-c)
+    return apply_per_pixel(image, lambda c: 255-c)
 
 
 # HELPER FUNCTIONS
