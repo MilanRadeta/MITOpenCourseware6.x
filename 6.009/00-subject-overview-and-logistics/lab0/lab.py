@@ -36,7 +36,17 @@ def echo(sound, num_echos, delay, scale):
 
 
 def pan(sound):
-    raise NotImplementedError
+    def pan_channel(channel, start, end):
+        channel = sound[channel].copy()
+        n = len(channel)
+        step = (end - start) / (n - 1)
+
+        for i in range(n):
+            channel[i] *= start + step * i
+            
+        return channel
+
+    return {'rate': sound['rate'], 'left': pan_channel('left', 1, 0), 'right': pan_channel('right', 0, 1)}
 
 
 def remove_vocals(sound):
@@ -115,24 +125,30 @@ if __name__ == '__main__':
     # sounds/hello.wav, rather than just as hello.wav, to account for the
     # sound files being in a different directory than this file)
     folder = root_folder + '/sounds'
-    output = root_folder + '/reversed'
-    for sound in os.listdir(folder):
-        if '.wav' in sound:
-            res = load_wav('%s/%s' % (folder, sound))
-            write_wav(backwards(res), '%s/%s' % (output, sound))
+    # output = root_folder + '/reversed'
+    # for sound in os.listdir(folder):
+    #     if '.wav' in sound:
+    #         res = load_wav('%s/%s' % (folder, sound))
+    #         write_wav(backwards(res), '%s/%s' % (output, sound))
 
-    output = root_folder + '/mixes'
-    sounds = [('chord', 'meow', 0.7), ('synth', 'water', 0.2)]
+    # output = root_folder + '/mixes'
+    # sounds = [('chord', 'meow', 0.7), ('synth', 'water', 0.2)]
+
+    # for sound in sounds:
+    #     sound1 = load_wav('%s/%s.wav' % (folder, sound[0]))
+    #     sound2 = load_wav('%s/%s.wav' % (folder, sound[1]))
+    #     write_wav(mix(sound1, sound2, sound[2]), '%s/%s-and-%s.wav' % (output, sound[0], sound[1]))
+
+    # output = root_folder + '/echoes'
+    # sounds = [('hello.wav', 4, 0.4, 0.4), ('chord.wav', 5, 0.3, 0.6)]
+
+    # for sound in sounds:
+    #     file = load_wav('%s/%s' % (folder, sound[0]))
+    #     write_wav(echo(file, sound[1], sound[2], sound[3]), '%s/%s' % (output, sound[0]))
+
+    output = root_folder + '/pans'
+    sounds = ['doorcreak.wav', 'car.wav']
 
     for sound in sounds:
-        sound1 = load_wav('%s/%s.wav' % (folder, sound[0]))
-        sound2 = load_wav('%s/%s.wav' % (folder, sound[1]))
-        write_wav(mix(sound1, sound2, sound[2]), '%s/%s-and-%s.wav' % (output, sound[0], sound[1]))
-
-    output = root_folder + '/echoes'
-    sounds = [('hello.wav', 4, 0.4, 0.4), ('chord.wav', 5, 0.3, 0.6)]
-
-    for sound in sounds:
-        file = load_wav('%s/%s' % (folder, sound[0]))
-        write_wav(echo(file, sound[1], sound[2], sound[3]), '%s/%s' % (output, sound[0]))
-
+        file = load_wav('%s/%s' % (folder, sound))
+        write_wav(pan(file), '%s/%s' % (output, sound))
