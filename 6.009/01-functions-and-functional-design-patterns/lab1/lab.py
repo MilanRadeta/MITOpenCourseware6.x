@@ -26,7 +26,7 @@ def clip(val, min=0, max=100):
 def get_pixel(image, x, y, use_out_of_bounds=False):
     if use_out_of_bounds:
         x = clip(x, 0, image['height'] - 1)
-        y = clip(x, 0, image['width'] - 1)
+        y = clip(y, 0, image['width'] - 1)
 
     index = xy_to_index(image, x, y)
     return image['pixels'][index]
@@ -76,12 +76,10 @@ def correlate(image, kernel):
     def apply_kernel(x, y):
         result = 0
         for i in range(kernel['height']):
+            img_i = x - kernel['height'] // 2 + i
             for j in range(kernel['width']):
-                kernel_index = xy_to_index(kernel, i, j)
-                img_i = clip(x - kernel['height'] // 2 + i, 0, image['height'] - 1)
-                img_j = clip(y - kernel['width'] // 2 + j, 0, image['width'] - 1)
-                img_index = xy_to_index(image, img_i, img_j)
-                result += kernel['pixels'][kernel_index] * image['pixels'][img_index]
+                img_j = y - kernel['width'] // 2 + j
+                result += get_pixel(kernel, i, j) * get_pixel(image, img_i, img_j, True)
         return result
 
     return apply_per_pixel(image, apply_kernel)
@@ -126,7 +124,7 @@ def gen_sharpen(n):
         'pixels': [ 2 - blur_val  if i == n // 2 and j == n // 2 else -blur_val  for i in range(n) for j in range(n)]
     }
     return result
-
+    
 # FILTERS
 
 def blurred(image, n):
@@ -149,11 +147,21 @@ def blurred(image, n):
     return round_and_clip_image(result)
 
 
-# SHARPEN
-
 def sharpened(image, n):
     return round_and_clip_image(correlate(image, gen_sharpen(n)))
 
+
+def edges(image):
+    hor_sobel = gen_empty_kernel(3)
+    ver_sobel = gen_empty_kernel(3)
+
+    hor_sobel['pixels'] = [-1, 0, 1, -2, 0, 2, -1, 0, 1]
+    ver_sobel['pixels'] = [-1, 2, 1, 0, 0, 0, -1, 2, 1]
+
+    hor_edges = correlate(image, hor_sobel)
+    ver_edges = correlate(image, ver_sobel)
+
+    return round_and_clip_image(apply_per_pixel(image, lambda x, y: (get_pixel(hor_edges, x, y) ** 2 + get_pixel(ver_edges, x, y) ** 2)  ** (1 / 2)))
 
 # HELPER FUNCTIONS FOR LOADING AND SAVING IMAGES
 
