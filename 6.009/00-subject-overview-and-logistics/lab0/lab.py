@@ -18,7 +18,21 @@ def mix(sound1, sound2, p):
 
 
 def echo(sound, num_echos, delay, scale):
-    raise NotImplementedError
+    sample_delay = round(delay * sound['rate'])
+
+    def generate_channel(channel):
+        channel = sound[channel].copy()
+
+        result = [0] * (len(channel) + num_echos * sample_delay)
+        for i in range(num_echos + 1):
+            for j in range(len(channel)):
+                val = channel[j]
+                k = i * sample_delay + j
+                result[k] += val * scale ** i
+            
+        return result
+
+    return {'rate': sound['rate'], 'left': generate_channel('left'), 'right': generate_channel('right')}
 
 
 def pan(sound):
@@ -36,6 +50,9 @@ import io
 import wave
 import struct
 import os
+import pathlib
+
+root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 def load_wav(filename):
     """
@@ -97,17 +114,25 @@ if __name__ == '__main__':
     # here is an example of loading a file (note that this is specified as
     # sounds/hello.wav, rather than just as hello.wav, to account for the
     # sound files being in a different directory than this file)
-    folder = 'sounds'
-    # output = 'reversed'
-    # for sound in os.listdir(folder):
-    #     if '.wav' in sound:
-    #         res = load_wav('%s/%s' % (folder, sound))
-    #         write_wav(backwards(res), '%s/%s' % (output, sound))
+    folder = root_folder + '/sounds'
+    output = root_folder + '/reversed'
+    for sound in os.listdir(folder):
+        if '.wav' in sound:
+            res = load_wav('%s/%s' % (folder, sound))
+            write_wav(backwards(res), '%s/%s' % (output, sound))
 
-    output = 'mixes'
-    mix_sounds = [('chord', 'meow', 0.7), ('synth', 'water', 0.2)]
+    output = root_folder + '/mixes'
+    sounds = [('chord', 'meow', 0.7), ('synth', 'water', 0.2)]
 
-    for sound in mix_sounds:
+    for sound in sounds:
         sound1 = load_wav('%s/%s.wav' % (folder, sound[0]))
         sound2 = load_wav('%s/%s.wav' % (folder, sound[1]))
         write_wav(mix(sound1, sound2, sound[2]), '%s/%s-and-%s.wav' % (output, sound[0], sound[1]))
+
+    output = root_folder + '/echoes'
+    sounds = [('hello.wav', 4, 0.4, 0.4), ('chord.wav', 5, 0.3, 0.6)]
+
+    for sound in sounds:
+        file = load_wav('%s/%s' % (folder, sound[0]))
+        write_wav(echo(file, sound[1], sound[2], sound[3]), '%s/%s' % (output, sound[0]))
+
