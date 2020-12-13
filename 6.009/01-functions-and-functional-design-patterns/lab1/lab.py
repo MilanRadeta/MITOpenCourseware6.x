@@ -212,6 +212,7 @@ if __name__ == '__main__':
         (root_folder + '/translation', lambda image: correlate(image, translation)),
         (root_folder + '/average', lambda image: round_and_clip_image(correlate(image, average))),
         (root_folder + '/tran_down_right', lambda image: round_and_clip_image(correlate(image, tran_down_right))),
+        (root_folder + '/blurred', lambda image: blurred(image, 5)),
     ]
     for img in os.listdir(folder):
         if '.png' in img:
