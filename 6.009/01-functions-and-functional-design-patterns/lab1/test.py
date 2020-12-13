@@ -111,7 +111,6 @@ def test_correlate_simple():
         'pixels': [35, 40, 41, 45, 50, 35, 40, 41, 45, 50, 40, 40, 42, 46, 52, 42, 46, 50, 55, 55, 48, 52, 56, 58, 60]
     }
     result = lab.correlate(image, kernel)
-    print(result)
     compare_images(result, expected)
 
 def test_correlate_simple2():
@@ -161,12 +160,55 @@ def test_blurred_images(kernsize, fname):
     compare_images(result, expected)
 
 def test_blurred_black_image():
-    # REPLACE THIS with your 1st test case from section 5.1
-    assert False
+    image = {
+        'height': 5,
+        'width': 6,
+        'pixels': [0] * 6 * 5
+    }
+    result = lab.blurred(image, 3)
+    compare_images(result, image)
+    result = lab.blurred(image, 5)
+    compare_images(result, image)
 
 def test_blurred_centered_pixel():
     # REPLACE THIS with your 2nd test case from section 5.1
-    assert False
+    inpfile = os.path.join(TEST_DIRECTORY, 'test_images', 'centered_pixel.png')
+    image = lab.load_image(inpfile)
+    expected = {
+        'height': 11,
+        'width': 11,
+        'pixels': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 28, 28, 28, 0, 0, 0, 0,
+                   0, 0, 0, 0, 28, 28, 28, 0, 0, 0, 0,
+                   0, 0, 0, 0, 28, 28, 28, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    }
+    result = lab.blurred(image, 3)
+    compare_images(result, expected)
+
+    expected = {
+        'height': 11,
+        'width': 11,
+        'pixels': [0, 0, 0,  0,  0,  0,  0,  0, 0, 0, 0,
+                   0, 0, 0,  0,  0,  0,  0,  0, 0, 0, 0,
+                   0, 0, 0,  0,  0,  0,  0,  0, 0, 0, 0,
+                   0, 0, 0, 10, 10, 10, 10, 10, 0, 0, 0,
+                   0, 0, 0, 10, 10, 10, 10, 10, 0, 0, 0,
+                   0, 0, 0, 10, 10, 10, 10, 10, 0, 0, 0,
+                   0, 0, 0, 10, 10, 10, 10, 10, 0, 0, 0,
+                   0, 0, 0, 10, 10, 10, 10, 10, 0, 0, 0,
+                   0, 0, 0,  0,  0,  0,  0,  0, 0, 0, 0,
+                   0, 0, 0,  0,  0,  0,  0,  0, 0, 0, 0,
+                   0, 0, 0,  0,  0,  0,  0,  0, 0, 0, 0],
+    }
+    result = lab.blurred(image, 5)
+    compare_images(result, expected)
 
 @pytest.mark.parametrize("kernsize", [1, 3, 9])
 @pytest.mark.parametrize("fname", ['mushroom', 'twocats', 'chess'])
