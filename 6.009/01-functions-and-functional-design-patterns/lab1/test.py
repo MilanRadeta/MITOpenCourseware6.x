@@ -171,7 +171,6 @@ def test_blurred_black_image():
     compare_images(result, image)
 
 def test_blurred_centered_pixel():
-    # REPLACE THIS with your 2nd test case from section 5.1
     inpfile = os.path.join(TEST_DIRECTORY, 'test_images', 'centered_pixel.png')
     image = lab.load_image(inpfile)
     expected = {
@@ -235,8 +234,25 @@ def test_edges_images(fname):
     compare_images(result, expected)
 
 def test_edges_centered_pixel():
-    # REPLACE THIS with your test case from section 6
-    assert False
+    inpfile = os.path.join(TEST_DIRECTORY, 'test_images', 'centered_pixel.png')
+    image = lab.load_image(inpfile)
+    expected = {
+        'height': 11,
+        'width': 11,
+        'pixels': [0, 0, 0, 0, 0,     0,  0,  0, 0, 0, 0,
+                   0, 0, 0, 0, 0,     0,  0,  0, 0, 0, 0,
+                   0, 0, 0, 0, 0,     0,  0,  0, 0, 0, 0,
+                   0, 0, 0, 0, 0,     0,  0,  0, 0, 0, 0,
+                   0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0,
+                   0, 0, 0, 0, 255,  0,  255, 0, 0, 0, 0,
+                   0, 0, 0, 0, 255, 255, 255, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0,     0,   0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0,     0,   0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0,     0,   0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0,     0,   0, 0, 0, 0, 0],
+    }
+    result = lab.edges(image)
+    compare_images(result, expected)
 
 if __name__ == '__main__':
     import sys
