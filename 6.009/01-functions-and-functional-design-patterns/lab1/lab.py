@@ -73,6 +73,7 @@ def correlate(image, kernel):
     """
 
     assert kernel['height'] % 2 == 1 and kernel['width'] % 2 == 1, 'Kernel must be odd-sized'
+
     def apply_kernel(x, y):
         result = 0
         for i in range(kernel['height']):
@@ -156,7 +157,7 @@ def edges(image):
     ver_sobel = gen_empty_kernel(3)
 
     hor_sobel['pixels'] = [-1, 0, 1, -2, 0, 2, -1, 0, 1]
-    ver_sobel['pixels'] = [-1, 2, 1, 0, 0, 0, -1, 2, 1]
+    ver_sobel['pixels'] = [-1, -2, -1, 0, 0, 0, 1, 2, 1]
 
     hor_edges = correlate(image, hor_sobel)
     ver_edges = correlate(image, ver_sobel)
