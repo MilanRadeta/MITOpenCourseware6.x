@@ -103,6 +103,22 @@ def round_and_clip_image(image):
 
 # FILTERS
 
+def gen_empty_kernel(n):
+    result = {
+        'height': n,
+        'width': n,
+        'pixels': [0] * n * n,
+    }
+    return result
+    
+def gen_box_blur(n):
+    result = {
+        'height': n,
+        'width': n,
+        'pixels': [1 / (n * n)] * n * n,
+    }
+    return result
+
 def blurred(image, n):
     """
     Return a new image representing the result of applying a box blur (with
@@ -113,14 +129,14 @@ def blurred(image, n):
     """
     # first, create a representation for the appropriate n-by-n kernel (you may
     # wish to define another helper function for this)
-    raise NotImplementedError
+    blur = gen_box_blur(n)
 
     # then compute the correlation of the input image with that kernel
-    raise NotImplementedError
+    result = correlate(image, blur)
 
     # and, finally, make sure that the output is a valid image (using the
     # helper function from above) before returning it.
-    raise NotImplementedError
+    return round_and_clip_image(result)
 
 
 
@@ -168,25 +184,17 @@ def save_image(image, filename, mode='PNG'):
         out.save(filename, mode)
     out.close()
 
-
+    
 if __name__ == '__main__':
     # code in this block will only be run when you explicitly run your script,
     # and not when the tests are being run.  this is a good place for
     # generating images, etc.
     folder = root_folder + '/test_images'
 
-    identity = {
-        'height': 3,
-        'width': 3,
-        'pixels': [0] * 3 * 3
-    }
+    identity = gen_empty_kernel(3)
     identity['pixels'][4] = 1
 
-    translation = {
-        'height': 5,
-        'width': 5,
-        'pixels': [0] * 5 * 5
-    }
+    translation = gen_empty_kernel(5)
     translation['pixels'][10] = 1
 
     average = {
@@ -195,11 +203,7 @@ if __name__ == '__main__':
         'pixels': [0, 0.2, 0, 0.2, 0.2, 0.2, 0, 0.2, 0]
     }
 
-    tran_down_right = {
-        'height': 9,
-        'width': 9,
-        'pixels': [0] * 9 * 9
-    }
+    tran_down_right = gen_empty_kernel(9)
     tran_down_right['pixels'][18] = 1
 
     outs_and_ops = [
