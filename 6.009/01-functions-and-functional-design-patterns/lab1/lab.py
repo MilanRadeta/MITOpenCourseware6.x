@@ -100,8 +100,7 @@ def round_and_clip_image(image):
     """
     return apply_per_pixel(image, lambda x, y: round(clip(get_pixel(image, x, y), 0, 255)))
 
-
-# FILTERS
+# KERNEL GENERATORS
 
 def gen_empty_kernel(n):
     result = {
@@ -118,6 +117,17 @@ def gen_box_blur(n):
         'pixels': [1 / (n * n)] * n * n,
     }
     return result
+    
+def gen_sharpen(n):
+    blur_val = 1 / (n * n)
+    result = {
+        'height': n,
+        'width': n,
+        'pixels': [ 2 - blur_val  if i == n // 2 and j == n // 2 else -blur_val  for i in range(n) for j in range(n)]
+    }
+    return result
+
+# FILTERS
 
 def blurred(image, n):
     """
@@ -138,6 +148,11 @@ def blurred(image, n):
     # helper function from above) before returning it.
     return round_and_clip_image(result)
 
+
+# SHARPEN
+
+def sharpened(image, n):
+    return round_and_clip_image(correlate(image, gen_sharpen(n)))
 
 
 # HELPER FUNCTIONS FOR LOADING AND SAVING IMAGES
@@ -213,6 +228,7 @@ if __name__ == '__main__':
         (root_folder + '/average', lambda image: round_and_clip_image(correlate(image, average))),
         (root_folder + '/tran_down_right', lambda image: round_and_clip_image(correlate(image, tran_down_right))),
         (root_folder + '/blurred', lambda image: blurred(image, 5)),
+        (root_folder + '/sharpened', lambda image: sharpened(image, 11)),
     ]
     for img in os.listdir(folder):
         if '.png' in img:
