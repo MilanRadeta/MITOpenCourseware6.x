@@ -17,6 +17,29 @@ def mix(sound1, sound2, p):
     return {'rate': sound1['rate'], 'left': mix_channel('left'), 'right': mix_channel('right')}
 
 
+def multimix(sounds, ps):
+    if len(sounds) != len(ps):
+        return None
+
+    rate = sounds[0]['rate']
+    out_len = len(sounds[0]['left'])
+    for s in sounds:
+        if s['rate'] != rate:
+            return None
+        if len(s['left']) < out_len:
+            out_len = len(s['left'])
+    
+    def mix_channel(channel):
+        result = [0] * out_len
+        for i in range(out_len):
+            for j in range(len(sounds)):
+                p, s = ps[j], sounds[j]
+                result[i] += s[channel][i] * p
+        return result
+    
+    return {'rate': rate, 'left': mix_channel('left'), 'right': mix_channel('right')}
+
+
 def echo(sound, num_echos, delay, scale, alternate=False):
     sample_delay = round(delay * sound['rate'])
     left_start = 0
@@ -176,9 +199,15 @@ if __name__ == '__main__':
     #     file = load_wav('%s/%s' % (folder, sound))
     #     write_wav(remove_vocals(file), '%s/%s' % (output, sound))
 
-    output = root_folder + '/alt_echoes'
-    sounds = [('hello.wav', 4, 2, 0.7), ('chord.wav', 5, 0.3, 0.6)]
+    # output = root_folder + '/alt_echoes'
+    # sounds = [('hello.wav', 4, 2, 0.7), ('chord.wav', 5, 0.3, 0.6)]
 
-    for sound in sounds:
-        file = load_wav('%s/%s' % (folder, sound[0]))
-        write_wav(echo(file, sound[1], sound[2], sound[3], alternate=True), '%s/%s' % (output, sound[0]))
+    # for sound in sounds:
+    #     file = load_wav('%s/%s' % (folder, sound[0]))
+    #     write_wav(echo(file, sound[1], sound[2], sound[3], alternate=True), '%s/%s' % (output, sound[0]))
+
+    output = root_folder + '/multimixes'
+    sounds = ['chord.wav', 'meow.wav', 'synth.wav']
+    sounds = [load_wav('%s/%s' % (folder, s)) for s in sounds]
+    ps = [0.5, 1, 0.2]
+    write_wav(multimix(sounds, ps), '%s/%s' % (output, 'multimix.wav'))
