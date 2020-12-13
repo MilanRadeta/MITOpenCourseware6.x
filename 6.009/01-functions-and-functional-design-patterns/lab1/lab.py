@@ -238,6 +238,7 @@ if __name__ == '__main__':
         (root_folder + '/tran_down_right', lambda image: round_and_clip_image(correlate(image, tran_down_right))),
         (root_folder + '/blurred', lambda image: blurred(image, 5)),
         (root_folder + '/sharpened', lambda image: sharpened(image, 11)),
+        (root_folder + '/edges', edges),
     ]
     for img in os.listdir(folder):
         if '.png' in img:
