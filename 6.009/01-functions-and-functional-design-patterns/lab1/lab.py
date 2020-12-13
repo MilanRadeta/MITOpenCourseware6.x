@@ -3,6 +3,10 @@
 import math
 
 from PIL import Image as Image
+import pathlib
+import os
+
+root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 # NO ADDITIONAL IMPORTS ALLOWED!
 
@@ -122,6 +126,9 @@ def save_image(image, filename, mode='PNG'):
     filename is given as a file-like object, the file type will be determined
     by the 'mode' parameter.
     """
+    if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+            
     out = Image.new(mode='L', size=(image['width'], image['height']))
     out.putdata(image['pixels'])
     if isinstance(filename, str):
@@ -135,4 +142,9 @@ if __name__ == '__main__':
     # code in this block will only be run when you explicitly run your script,
     # and not when the tests are being run.  this is a good place for
     # generating images, etc.
-    pass
+    folder = root_folder + '/test_images'
+    output = root_folder + '/inverted'
+    for img in os.listdir(folder):
+        if '.png' in img:
+            res = load_image('%s/%s' % (folder, img))
+            save_image(inverted(res), '%s/%s' % (output, img))
