@@ -17,22 +17,35 @@ def mix(sound1, sound2, p):
     return {'rate': sound1['rate'], 'left': mix_channel('left'), 'right': mix_channel('right')}
 
 
-def echo(sound, num_echos, delay, scale):
+def echo(sound, num_echos, delay, scale, alternate=False):
     sample_delay = round(delay * sound['rate'])
+    left_start = 0
+    if alternate:
+        right_start = 1
+        step = 2
+    else:
+        right_start = 0
+        step = 1
 
-    def generate_channel(channel):
+    def generate_channel(channel, start):
         channel = sound[channel].copy()
 
-        result = [0] * (len(channel) + num_echos * sample_delay)
-        for i in range(num_echos + 1):
+        result = []
+        for j in range(len(channel) + num_echos * sample_delay):
+            if j < len(channel):
+                result.append(channel[j])
+            else:
+                result.append(0)
+
+        for i in range(start, num_echos, step):
             for j in range(len(channel)):
                 val = channel[j]
-                k = i * sample_delay + j
-                result[k] += val * scale ** i
+                k = (i + 1) * sample_delay + j
+                result[k] += val * scale ** (i + 1)
             
         return result
 
-    return {'rate': sound['rate'], 'left': generate_channel('left'), 'right': generate_channel('right')}
+    return {'rate': sound['rate'], 'left': generate_channel('left', left_start), 'right': generate_channel('right', right_start)}
 
 
 def pan(sound):
@@ -156,9 +169,16 @@ if __name__ == '__main__':
     #     file = load_wav('%s/%s' % (folder, sound))
     #     write_wav(pan(file), '%s/%s' % (output, sound))
 
-    output = root_folder + '/karaoke'
-    sounds = ['coffee.wav']
+    # output = root_folder + '/karaoke'
+    # sounds = ['coffee.wav']
+
+    # for sound in sounds:
+    #     file = load_wav('%s/%s' % (folder, sound))
+    #     write_wav(remove_vocals(file), '%s/%s' % (output, sound))
+
+    output = root_folder + '/alt_echoes'
+    sounds = [('hello.wav', 4, 2, 0.7), ('chord.wav', 5, 0.3, 0.6)]
 
     for sound in sounds:
-        file = load_wav('%s/%s' % (folder, sound))
-        write_wav(remove_vocals(file), '%s/%s' % (output, sound))
+        file = load_wav('%s/%s' % (folder, sound[0]))
+        write_wav(echo(file, sound[1], sound[2], sound[3], alternate=True), '%s/%s' % (output, sound[0]))
