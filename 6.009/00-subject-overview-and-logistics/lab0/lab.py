@@ -50,7 +50,10 @@ def pan(sound):
 
 
 def remove_vocals(sound):
-    raise NotImplementedError
+    left = sound['left']
+    right = sound['right']
+    channel = [left[i] - right[i] for i in range(len(left))]
+    return {'rate': sound['rate'], 'left': channel, 'right': channel.copy()}
 
 
 # below are helper functions for converting back-and-forth between WAV files
@@ -146,9 +149,16 @@ if __name__ == '__main__':
     #     file = load_wav('%s/%s' % (folder, sound[0]))
     #     write_wav(echo(file, sound[1], sound[2], sound[3]), '%s/%s' % (output, sound[0]))
 
-    output = root_folder + '/pans'
-    sounds = ['doorcreak.wav', 'car.wav']
+    # output = root_folder + '/pans'
+    # sounds = ['doorcreak.wav', 'car.wav']
+
+    # for sound in sounds:
+    #     file = load_wav('%s/%s' % (folder, sound))
+    #     write_wav(pan(file), '%s/%s' % (output, sound))
+
+    output = root_folder + '/karaoke'
+    sounds = ['coffee.wav']
 
     for sound in sounds:
         file = load_wav('%s/%s' % (folder, sound))
-        write_wav(pan(file), '%s/%s' % (output, sound))
+        write_wav(remove_vocals(file), '%s/%s' % (output, sound))
