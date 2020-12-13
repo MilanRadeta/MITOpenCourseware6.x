@@ -10,13 +10,31 @@ root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 # NO ADDITIONAL IMPORTS ALLOWED!
 
+def xy_to_index(image, x, y):
+    return x * image['width'] + y
 
-def get_pixel(image, x, y):
-    return image['pixels'][x * image['width'] + y]
+def clip(val, min=0, max=100):
+    if val < 0:
+        return 0
+    
+    if val > max:
+        return max
+    
+    return val
+    
+
+def get_pixel(image, x, y, use_out_of_bounds=False):
+    if use_out_of_bounds:
+        x = clip(x, 0, image['height'] - 1)
+        y = clip(x, 0, image['width'] - 1)
+
+    index = xy_to_index(image, x, y)
+    return image['pixels'][index]
 
 
 def set_pixel(image, x, y, c):
-    image['pixels'][x * image['width'] + y] = c
+    index = xy_to_index(image, x, y)
+    image['pixels'][index] = c
 
 
 def apply_per_pixel(image, func):
@@ -27,14 +45,13 @@ def apply_per_pixel(image, func):
     }
     for x in range(image['height']):
         for y in range(image['width']):
-            color = get_pixel(image, x, y)
-            newcolor = func(color)
+            newcolor = func(x, y)
             set_pixel(result, x, y, newcolor)
     return result
 
 
 def inverted(image):
-    return apply_per_pixel(image, lambda c: 255-c)
+    return apply_per_pixel(image, lambda x, y: 255-get_pixel(image, x, y))
 
 
 # HELPER FUNCTIONS
@@ -52,8 +69,22 @@ def correlate(image, kernel):
     separate structure to represent the output.
 
     DESCRIBE YOUR KERNEL REPRESENTATION HERE
+    Kernel should have the same form as a 6.009 image
     """
-    raise NotImplementedError
+
+    assert kernel['height'] % 2 == 1 and kernel['width'] % 2 == 1, 'Kernel must be odd-sized'
+    def apply_kernel(x, y):
+        result = 0
+        for i in range(kernel['height']):
+            for j in range(kernel['width']):
+                kernel_index = xy_to_index(kernel, i, j)
+                img_i = clip(x - kernel['height'] // 2 + i, 0, image['height'] - 1)
+                img_j = clip(y - kernel['width'] // 2 + j, 0, image['width'] - 1)
+                img_index = xy_to_index(image, img_i, img_j)
+                result += kernel['pixels'][kernel_index] * image['pixels'][img_index]
+        return result
+
+    return apply_per_pixel(image, apply_kernel)
 
 
 def round_and_clip_image(image):
@@ -67,7 +98,7 @@ def round_and_clip_image(image):
     255 in the output; and any locations with values lower than 0 in the input
     should have value 0 in the output.
     """
-    raise NotImplementedError
+    return apply_per_pixel(image, lambda x, y: round(clip(get_pixel(image, x, y), 0, 255)))
 
 
 # FILTERS
@@ -128,7 +159,7 @@ def save_image(image, filename, mode='PNG'):
     """
     if not os.path.exists(os.path.dirname(filename)):
             os.makedirs(os.path.dirname(filename))
-            
+
     out = Image.new(mode='L', size=(image['width'], image['height']))
     out.putdata(image['pixels'])
     if isinstance(filename, str):

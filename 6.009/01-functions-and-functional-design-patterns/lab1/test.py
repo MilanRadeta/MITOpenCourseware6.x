@@ -94,6 +94,59 @@ def test_inverted_images(fname):
     assert object_hash(im) == oim, 'Be careful not to modify the original image!'
     compare_images(result, expected)
 
+def test_correlate_simple():
+    image = {
+        'height': 5,
+        'width': 5,
+        'pixels': [35, 40, 41, 45, 50, 40, 40, 42, 46, 52, 42, 46, 50, 55, 55, 48, 52, 56, 58, 60, 56, 60, 65, 70, 75]
+    }
+    kernel = {
+        'height': 5,
+        'width': 5,
+        'pixels': [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+    expected = {
+        'height': 5,
+        'width': 5,
+        'pixels': [35, 40, 41, 45, 50, 35, 40, 41, 45, 50, 40, 40, 42, 46, 52, 42, 46, 50, 55, 55, 48, 52, 56, 58, 60]
+    }
+    result = lab.correlate(image, kernel)
+    print(result)
+    compare_images(result, expected)
+
+def test_correlate_simple2():
+    image = {
+        'height': 3,
+        'width': 3,
+        'pixels': [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    }
+    kernel = {
+        'height': 3,
+        'width': 3,
+        'pixels': [1, 0, 1, 0, 1, 0, 1, 0, 1]
+    }
+    expected = {
+        'height': 3,
+        'width': 3,
+        'pixels': [13, 16, 19, 22, 25, 28, 31, 34]
+    }
+    result = lab.correlate(image, kernel)
+    compare_images(result, expected)
+
+def test_round_and_clip():
+    image = {
+        'height': 3,
+        'width': 3,
+        'pixels': [-1, 0, 0.25, 0.5, 0.75, 1.1, 254.4, 254.6, 256.1]
+    }
+    expected = {
+        'height': 3,
+        'width': 3,
+        'pixels': [0., 0., 0., 0., 1, 1, 254, 255, 255]
+    }
+    result = lab.round_and_clip_image(image)
+    compare_images(result, expected)
+
 
 @pytest.mark.parametrize("kernsize", [1, 3, 7])
 @pytest.mark.parametrize("fname", ['mushroom', 'twocats', 'chess'])
