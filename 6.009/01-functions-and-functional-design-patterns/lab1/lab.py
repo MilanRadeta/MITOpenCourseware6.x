@@ -174,8 +174,43 @@ if __name__ == '__main__':
     # and not when the tests are being run.  this is a good place for
     # generating images, etc.
     folder = root_folder + '/test_images'
-    output = root_folder + '/inverted'
+
+    identity = {
+        'height': 3,
+        'width': 3,
+        'pixels': [0] * 3 * 3
+    }
+    identity['pixels'][4] = 1
+
+    translation = {
+        'height': 5,
+        'width': 5,
+        'pixels': [0] * 5 * 5
+    }
+    translation['pixels'][10] = 1
+
+    average = {
+        'height': 3,
+        'width': 3,
+        'pixels': [0, 0.2, 0, 0.2, 0.2, 0.2, 0, 0.2, 0]
+    }
+
+    tran_down_right = {
+        'height': 9,
+        'width': 9,
+        'pixels': [0] * 9 * 9
+    }
+    tran_down_right['pixels'][18] = 1
+
+    outs_and_ops = [
+        (root_folder + '/inverted', inverted),
+        (root_folder + '/identity', lambda image: correlate(image, identity)),
+        (root_folder + '/translation', lambda image: correlate(image, translation)),
+        (root_folder + '/average', lambda image: round_and_clip_image(correlate(image, average))),
+        (root_folder + '/tran_down_right', lambda image: round_and_clip_image(correlate(image, tran_down_right))),
+    ]
     for img in os.listdir(folder):
         if '.png' in img:
             res = load_image('%s/%s' % (folder, img))
-            save_image(inverted(res), '%s/%s' % (output, img))
+            for output, op in outs_and_ops:
+                save_image(op(res), '%s/%s' % (output, img))
