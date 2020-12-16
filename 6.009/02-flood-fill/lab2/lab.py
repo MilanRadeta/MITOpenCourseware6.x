@@ -167,6 +167,24 @@ def edges(image):
 
     return round_and_clip_image(apply_per_pixel(image, lambda x, y: (get_pixel(hor_edges, x, y) ** 2 + get_pixel(ver_edges, x, y) ** 2)  ** (1 / 2)))
 
+def multiply(image, multiplier):
+    return round_and_clip_image(apply_per_pixel(image, lambda x, y: get_pixel(image, x, y) * multiplier))
+
+def multiply_color(image, multiplier):
+    channels = split_color_to_greyscales(image)
+    filtered = [multiply(channels[i], multiplier[i]) for i in range(len(channels))]
+    return merge_greyscales_to_color(filtered)
+
+def threshold(image, threshold):
+    return apply_per_pixel(image, lambda x, y: 255 if get_pixel(image, x, y) >= threshold else 0)
+
+def emboss(image):
+    filter = gen_empty_kernel(3)
+    filter['pixels'] = [0, 0, 1, 0, 0, 0, -1, 0, 0]
+    result = correlate(image, filter)
+    result['pixels'] = [pixel + 128 for pixel in result['pixels']]
+    return round_and_clip_image(result)
+
 # HELPER FUNCTIONS FOR LOADING AND SAVING GREYSCALE IMAGES
 
 def load_greyscale_image(filename):
@@ -418,6 +436,9 @@ if __name__ == '__main__':
         (root_folder + '/sharpened', color_filter_from_greyscale_filter(make_sharpen_filter(7))),
         (root_folder + '/cascade', filter_cascade([filter1, filter1, filter2, filter1])),
         (root_folder + '/seams', lambda img: seam_carving(img, 100)),
+        (root_folder + '/multiply', lambda img: multiply_color(img, (0.8, 1.2, 1))),
+        (root_folder + '/threshold', color_filter_from_greyscale_filter(lambda img: threshold(img, 128))),
+        (root_folder + '/emboss', color_filter_from_greyscale_filter(emboss)),
     ]
     for img in os.listdir(folder):
         if '.png' in img:
