@@ -271,6 +271,7 @@ def seam_carving(image, ncols):
     Starting from the given image, use the seam carving technique to remove
     ncols (an integer) columns from the image.
     """
+    ncols = min(ncols, image['width'] - 1)
     while ncols > 0:
         ncols -= 1
         grey = greyscale_image_from_color_image(image)
@@ -416,6 +417,7 @@ if __name__ == '__main__':
         (root_folder + '/blurred', color_filter_from_greyscale_filter(make_blur_filter(9))),
         (root_folder + '/sharpened', color_filter_from_greyscale_filter(make_sharpen_filter(7))),
         (root_folder + '/cascade', filter_cascade([filter1, filter1, filter2, filter1])),
+        (root_folder + '/seams', lambda img: seam_carving(img, 100)),
     ]
     for img in os.listdir(folder):
         if '.png' in img:
