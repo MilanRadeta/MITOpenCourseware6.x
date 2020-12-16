@@ -40,7 +40,7 @@ def compare_color_images(im1, im2):
             assert False, 'Incorrect value at location %s (differs from expected by %s)' % (ix, tuple(abs(i[t]-j[t]) for t in {0,1,2}))
 
 def test_load_color():
-    result = lab.load_color_image('test_images/centered_pixel.png')
+    result = lab.load_color_image(os.path.join(TEST_DIRECTORY, 'test_images', 'centered_pixel.png'))
     expected = {
         'height': 11,
         'width': 11,
@@ -60,7 +60,7 @@ def test_load_color():
 
 
 def test_color_filter_inverted():
-    im = lab.load_color_image('test_images/centered_pixel.png')
+    im = lab.load_color_image(os.path.join(TEST_DIRECTORY, 'test_images', 'centered_pixel.png'))
     color_inverted = lab.color_filter_from_greyscale_filter(lab.inverted)
     assert callable(color_inverted), 'color_filter_from_greyscale_filter should return a function.'
     result = color_inverted(im)
@@ -83,7 +83,7 @@ def test_color_filter_inverted():
 
 
 def test_color_filter_edges():
-    im = lab.load_color_image('test_images/centered_pixel.png')
+    im = lab.load_color_image(os.path.join(TEST_DIRECTORY, 'test_images', 'centered_pixel.png'))
     color_edges = lab.color_filter_from_greyscale_filter(lab.edges)
     assert callable(color_edges), 'color_filter_from_greyscale_filter should return a function.'
     result = color_edges(im)
