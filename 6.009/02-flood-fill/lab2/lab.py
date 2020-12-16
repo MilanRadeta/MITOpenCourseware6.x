@@ -249,7 +249,15 @@ def filter_cascade(filters):
     single filter such that applying that filter to an image produces the same
     output as applying each of the individual ones in turn.
     """
-    raise NotImplementedError
+    def filter_all(image):
+        rem_filters = filters.copy()
+        while len(rem_filters) > 0:
+            f = rem_filters.pop(0)
+            image = f(image)
+        return image
+
+    return filter_all
+
 
 # SEAM CARVING
 
