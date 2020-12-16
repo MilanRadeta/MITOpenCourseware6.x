@@ -366,11 +366,15 @@ if __name__ == '__main__':
     # and not when the tests are being run.  this is a good place for
     # generating images, etc.
 
+    filter1 = color_filter_from_greyscale_filter(edges)
+    filter2 = color_filter_from_greyscale_filter(make_blur_filter(5))
+
     folder = root_folder + '/test_images'
     outs_and_ops = [
         (root_folder + '/inverted', color_filter_from_greyscale_filter(inverted)),
         (root_folder + '/blurred', color_filter_from_greyscale_filter(make_blur_filter(9))),
         (root_folder + '/sharpened', color_filter_from_greyscale_filter(make_sharpen_filter(7))),
+        (root_folder + '/cascade', filter_cascade([filter1, filter1, filter2, filter1])),
     ]
     for img in os.listdir(folder):
         if '.png' in img:
