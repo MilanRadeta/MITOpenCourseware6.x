@@ -13,6 +13,9 @@ root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 def xy_to_index(image, x, y):
     return x * image['width'] + y
 
+def index_to_xy(image, index):
+    return index // image['width'], index % image['width'] 
+
 def clip(val, min=0, max=100):
     if val < 0:
         return 0
@@ -268,8 +271,22 @@ def seam_carving(image, ncols):
     Starting from the given image, use the seam carving technique to remove
     ncols (an integer) columns from the image.
     """
-    raise NotImplementedError
+    while ncols > 0:
+        ncols -= 1
+        grey = greyscale_image_from_color_image(image)
+        energy_map = compute_energy(grey)
+        cem = cumulative_energy_map(energy_map)
+        seam = minimum_energy_seam(cem)
+        image = image_without_seam(image, seam)
+    return image
 
+
+def print_image(image):
+    for x in range(0, image['height']):
+        for y in range(0, image['width']):
+            print(get_pixel(image, x, y), end=' ')
+        print()
+    print()
 
 # Optional Helper Functions for Seam Carving
 
@@ -279,7 +296,7 @@ def greyscale_image_from_color_image(image):
 
     Returns a greyscale image (represented as a dictionary).
     """
-    raise NotImplementedError
+    return {'height': image['height'], 'width': image['width'], 'pixels': [round(.299 * pixel[0] + .587 * pixel[1] + .114 * pixel[2]) for pixel in image['pixels']]}
 
 
 def compute_energy(grey):
@@ -289,7 +306,7 @@ def compute_energy(grey):
 
     Returns a greyscale image (represented as a dictionary).
     """
-    raise NotImplementedError
+    return edges(grey)
 
 
 def cumulative_energy_map(energy):
@@ -301,7 +318,15 @@ def cumulative_energy_map(energy):
     the values in the 'pixels' array may not necessarily be in the range [0,
     255].
     """
-    raise NotImplementedError
+    result = {'height': energy['height'], 'width': energy['width'], 'pixels': energy['pixels'].copy()}
+
+    for x in range(1, result['height']):
+        for y in range(0, result['width']):
+            value = get_pixel(result, x, y)
+            value += min([get_pixel(result, x - 1, y + i, use_out_of_bounds=True) for i in range(-1, 2)])
+            set_pixel(result, x, y, value)
+
+    return result
 
 
 def minimum_energy_seam(cem):
@@ -310,7 +335,23 @@ def minimum_energy_seam(cem):
     'pixels' list that correspond to pixels contained in the minimum-energy
     seam (computed as described in the lab 2 writeup).
     """
-    raise NotImplementedError
+    key_fun = lambda k: k[1]
+    result = []
+    x = cem['height'] - 1
+    y, min_val = min([(y, get_pixel(cem, x, y)) for y in range(0, cem['width'])], key=key_fun)
+    result.append(xy_to_index(cem, x, y))
+    while x > 0:
+        x -= 1
+        y, min_val = min([(y + j, get_pixel(cem, x, y + j, True)) for j in range(-1, 2)], key=key_fun)
+        if y < 0:
+            y = 0
+        elif y >= cem['width']:
+            y = cem['width'] - 1
+        result.append(xy_to_index(cem, x, y))
+
+    return result
+
+
 
 
 def image_without_seam(image, seam):
@@ -320,7 +361,7 @@ def image_without_seam(image, seam):
     pixels from the original image except those corresponding to the locations
     in the given list.
     """
-    raise NotImplementedError
+    return {'height': image['height'], 'width': image['width'] - 1, 'pixels': [image['pixels'][i] for i in range(len(image['pixels'])) if i not in seam]}
 
 
 # HELPER FUNCTIONS FOR LOADING AND SAVING COLOR IMAGES
