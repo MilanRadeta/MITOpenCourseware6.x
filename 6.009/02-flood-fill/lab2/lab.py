@@ -236,11 +236,11 @@ def color_filter_from_greyscale_filter(filt):
 
 
 def make_blur_filter(n):
-    raise NotImplementedError
+    return lambda img: blurred(img, n)
 
 
 def make_sharpen_filter(n):
-    raise NotImplementedError
+    return lambda img: sharpened(img, n)
 
 
 def filter_cascade(filters):
@@ -250,7 +250,6 @@ def filter_cascade(filters):
     output as applying each of the individual ones in turn.
     """
     raise NotImplementedError
-
 
 # SEAM CARVING
 
@@ -344,7 +343,7 @@ def save_color_image(image, filename, mode='PNG'):
     """
     if not os.path.exists(os.path.dirname(filename)):
             os.makedirs(os.path.dirname(filename))
-            
+    
     out = Image.new(mode='RGB', size=(image['width'], image['height']))
     out.putdata(image['pixels'])
     if isinstance(filename, str):
@@ -362,13 +361,8 @@ if __name__ == '__main__':
     folder = root_folder + '/test_images'
     outs_and_ops = [
         (root_folder + '/inverted', color_filter_from_greyscale_filter(inverted)),
-        # (root_folder + '/identity', lambda image: correlate(image, identity)),
-        # (root_folder + '/translation', lambda image: correlate(image, translation)),
-        # (root_folder + '/average', lambda image: round_and_clip_image(correlate(image, average))),
-        # (root_folder + '/tran_down_right', lambda image: round_and_clip_image(correlate(image, tran_down_right))),
-        # (root_folder + '/blurred', lambda image: blurred(image, 5)),
-        # (root_folder + '/sharpened', lambda image: sharpened(image, 11)),
-        # (root_folder + '/edges', edges),
+        (root_folder + '/blurred', color_filter_from_greyscale_filter(make_blur_filter(9))),
+        (root_folder + '/sharpened', color_filter_from_greyscale_filter(make_sharpen_filter(7))),
     ]
     for img in os.listdir(folder):
         if '.png' in img:
