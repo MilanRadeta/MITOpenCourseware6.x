@@ -4,7 +4,10 @@
 # (except in the last part of the lab; see the lab writeup for details)
 import math
 from PIL import Image
+import pathlib
 import os
+
+root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 
 def xy_to_index(image, x, y):
@@ -206,6 +209,14 @@ def save_greyscale_image(image, filename, mode='PNG'):
     out.close()
 
 
+# HELPERS
+
+def split_color_to_greyscales(image):
+    return [{'height': image['height'], 'width': image['width'], 'pixels': list(pixels)} for pixels in zip(*image['pixels'])]
+
+def merge_greyscales_to_color(images):
+    return {'height': images[0]['height'], 'width': images[0]['width'], 'pixels': list(zip(*[img['pixels'] for img in images]))}
+
 # VARIOUS FILTERS
 
 
@@ -215,7 +226,13 @@ def color_filter_from_greyscale_filter(filt):
     greyscale image as output, returns a function that takes a color image as
     input and produces the filtered color image.
     """
-    raise NotImplementedError
+    def color_filter(image):
+        channels = split_color_to_greyscales(image)
+        filtered = [filt(channel) for channel in channels]
+        return merge_greyscales_to_color(filtered)
+        
+    return color_filter
+
 
 
 def make_blur_filter(n):
@@ -325,6 +342,9 @@ def save_color_image(image, filename, mode='PNG'):
     If filename is given as a file-like object, the file type will be
     determined by the 'mode' parameter.
     """
+    if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+            
     out = Image.new(mode='RGB', size=(image['width'], image['height']))
     out.putdata(image['pixels'])
     if isinstance(filename, str):
@@ -338,4 +358,21 @@ if __name__ == '__main__':
     # code in this block will only be run when you explicitly run your script,
     # and not when the tests are being run.  this is a good place for
     # generating images, etc.
-    pass
+
+    folder = root_folder + '/test_images'
+    outs_and_ops = [
+        (root_folder + '/inverted', color_filter_from_greyscale_filter(inverted)),
+        # (root_folder + '/identity', lambda image: correlate(image, identity)),
+        # (root_folder + '/translation', lambda image: correlate(image, translation)),
+        # (root_folder + '/average', lambda image: round_and_clip_image(correlate(image, average))),
+        # (root_folder + '/tran_down_right', lambda image: round_and_clip_image(correlate(image, tran_down_right))),
+        # (root_folder + '/blurred', lambda image: blurred(image, 5)),
+        # (root_folder + '/sharpened', lambda image: sharpened(image, 11)),
+        # (root_folder + '/edges', edges),
+    ]
+    for img in os.listdir(folder):
+        if '.png' in img:
+            res = load_color_image('%s/%s' % (folder, img))
+            for output, op in outs_and_ops:
+                save_color_image(op(res), '%s/%s' % (output, img))
+
