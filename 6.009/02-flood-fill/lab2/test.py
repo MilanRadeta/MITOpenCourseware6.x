@@ -125,7 +125,7 @@ def test_blur_filter():
     blur_filter = lab.make_blur_filter(3)
     assert callable(blur_filter), 'make_blur_filter should return a function.'
     color_blur = lab.color_filter_from_greyscale_filter(blur_filter)
-    im = lab.load_color_image('test_images/centered_pixel.png')
+    im = lab.load_color_image(os.path.join(TEST_DIRECTORY, 'test_images', 'centered_pixel.png'))
     result = color_blur(im)
     expected = {
         'height': 11,
@@ -183,7 +183,7 @@ def test_small_cascade():
     color_inverted = lab.color_filter_from_greyscale_filter(lab.inverted)
     color_blur_5 = lab.color_filter_from_greyscale_filter(lab.make_blur_filter(5))
 
-    im = lab.load_color_image('test_images/centered_pixel.png')
+    im = lab.load_color_image(os.path.join(TEST_DIRECTORY, 'test_images', 'centered_pixel.png'))
     expected = {
         'height': 11,
         'width': 11,
