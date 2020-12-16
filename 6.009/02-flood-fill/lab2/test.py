@@ -258,6 +258,60 @@ def seams_one(images):
         expfile = os.path.join(TEST_DIRECTORY, 'test_results', f'{i}_1seam.png')
         compare_color_images(result, lab.load_color_image(expfile))
 
+def test_cumulative_energy_map():
+    input = {'height': 5, 'width': 5, 'pixels': list(range(25))}
+    expected = {
+        'height': 5, 'width': 5,
+        'pixels': [
+             0,  1,  2,  3,  4,
+             5,  6,  8, 10, 12,
+            15, 16, 18, 21, 24,
+            30, 31, 33, 36, 40,
+            50, 51, 53, 56, 60
+        ]
+    }
+    actual = lab.cumulative_energy_map(input)
+    compare_greyscale_images(actual, expected)
+
+def test_cumulative_energy_map2():
+    input = {
+        'height': 5, 'width': 5,
+        'pixels': [
+             0,  1,  2,  3,  4,
+             9,  8,  7,  6,  5,
+            10, 11, 12, 13, 14,
+            19, 18, 17, 16, 15,
+            20, 21, 22, 23, 24
+        ]
+    }
+    expected = {
+        'height': 5, 'width': 5,
+        'pixels': [
+             0,  1,  2,  3,  4,
+             9,  8,  8,  8,  8,
+            18, 19, 20, 21, 22,
+            37, 36, 36, 36, 36,
+            56, 57, 58, 59, 60
+        ]
+    }
+    actual = lab.cumulative_energy_map(input)
+    compare_greyscale_images(actual, expected)
+
+def test_minimum_energy_seam():
+    input = {
+        'height': 5, 'width': 5,
+        'pixels': [
+             0,  1,  2,  3,  4,
+             9,  8,  8,  8,  8,
+            20, 19, 18, 21, 22,
+            37, 36, 36, 36, 36,
+            56, 57, 58, 59, 60
+        ]
+    }
+    expected = [20, 16, 12, 6, 0]
+    actual = lab.minimum_energy_seam(input)
+    for ix, (i, j) in enumerate(zip(actual, expected)):
+        assert i == j, 'Incorrect value at location %s (differs from expected by %s)' % (ix, abs(i-j))
 
 def test_seamcarving_images_1():
     seams_one(('pattern', 'smallfrog'))
