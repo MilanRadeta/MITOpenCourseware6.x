@@ -54,7 +54,15 @@ def acted_together(data, actor_id_1, actor_id_2):
 
 
 def actors_with_bacon_number(data, n):
-    raise NotImplementedError("Implement me!")
+    ids = { 4724 }
+    processed = set()
+    while n > 0 and len(ids) > 0:
+        n -= 1
+        new_ids = {actor_id for id in ids for actor_id in data['actor_to_actors'][id] if actor_id not in processed and actor_id not in ids}
+        processed.update(ids)
+        ids = new_ids
+
+    return ids
 
 
 def bacon_path(data, actor_id):
