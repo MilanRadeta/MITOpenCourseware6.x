@@ -14,11 +14,41 @@ root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 
 
 def transform_data(raw_data):
-    return raw_data
+    with open(NAMES_PICKLE, 'rb') as f:
+        names = pickle.load(f)
+    with open(MOVIES_PICKLE, 'rb') as f:
+        movies = pickle.load(f)
+    
+    id_to_name = {id: name for name, id in names.items()}
+    id_to_movie = {id: name for name, id in movies.items()}
+
+    actor_to_actors = {}
+    actor_to_movies = {}
+    movie_to_actors = {}
+
+    for actor1, actor2, movie in raw_data:
+        actor_to_actors.setdefault(actor1, set()).add(actor2)
+        actor_to_actors.setdefault(actor2, set()).add(actor1)
+        actor_to_movies.setdefault(actor1, set()).add(movie)
+        actor_to_movies.setdefault(actor2, set()).add(movie)
+        movie_to_actors.setdefault(movie, set()).add(actor1)
+        movie_to_actors.setdefault(movie, set()).add(actor2)
+        
+    return {
+        'name_to_id': names,
+        'movie_to_id': movies,
+
+        'id_to_name': id_to_name,
+        'id_to_movie': id_to_movie,
+        
+        'actor_to_actors': actor_to_actors,
+        'actor_to_movies': actor_to_movies,
+        'movie_to_actors': movie_to_actors,
+    }
 
 
 def acted_together(data, actor_id_1, actor_id_2):
-    raise NotImplementedError("Implement me!")
+    return actor_id_1 == actor_id_2 or actor_id_2 in data['actor_to_actors'][actor_id_1]
 
 
 def actors_with_bacon_number(data, n):
