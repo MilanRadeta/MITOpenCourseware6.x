@@ -176,6 +176,12 @@ def test_bacon_path_06():
     assert result == expected
 
 
+def test_tiny_actor_to_actor_path():
+    # Actor path, large database, length of 7 (8 actors, 7 movies)
+    actor_1 = 1640
+    actor_2 = 1532
+    assert lab.actor_to_actor_path(db_tiny, actor_1, actor_2) == [1640, 2876, 1532]
+
 def test_actor_to_actor_path_01():
     # Actor path, large database, length of 7 (8 actors, 7 movies)
     actor_1 = 1345462
