@@ -72,27 +72,7 @@ def bacon_path(data, actor_id):
 
 
 def actor_to_actor_path(data, actor_id_1, actor_id_2):
-    actor_to_actors = data['actor_to_actors']
-    nodes = [{
-        'id': actor_id_1,
-        'path': [actor_id_1]
-    }]
-    processed = set()
-    i = 0
-    while len(nodes) > i:
-        node = nodes[i]
-        processed.add(node['id'])
-        if node['id'] == actor_id_2:
-            return node['path']
-        children = actor_to_actors.get(node['id'], [])
-        children = [{
-            'id': child,
-            'path': node['path'] + [child]
-        } for child in children if child not in processed]
-        nodes.extend(children)
-        i += 1
-
-    return None
+    return actor_path(data, actor_id_1, lambda id: id == actor_id_2)
 
 
 def movies_for_actor_path(data, path):
@@ -110,7 +90,27 @@ def movies_for_actor_path(data, path):
     return result
 
 def actor_path(data, actor_id_1, goal_test_function):
-    raise NotImplementedError("Implement me!")
+    actor_to_actors = data['actor_to_actors']
+    nodes = [{
+        'id': actor_id_1,
+        'path': [actor_id_1]
+    }]
+    processed = set()
+    i = 0
+    while len(nodes) > i:
+        node = nodes[i]
+        processed.add(node['id'])
+        if goal_test_function(node['id']):
+            return node['path']
+        children = actor_to_actors.get(node['id'], [])
+        children = [{
+            'id': child,
+            'path': node['path'] + [child]
+        } for child in children if child not in processed]
+        nodes.extend(children)
+        i += 1
+
+    return None
 
 
 def actors_connecting_films(data, film1, film2):
