@@ -27,12 +27,14 @@ def transform_data(raw_data):
     movie_to_actors = {}
 
     for actor1, actor2, movie in raw_data:
-        actor_to_actors.setdefault(actor1, set()).add(actor2)
-        actor_to_actors.setdefault(actor2, set()).add(actor1)
+        if actor1 != actor2:
+            actor_to_actors.setdefault(actor1, set()).add(actor2)
+            actor_to_actors.setdefault(actor2, set()).add(actor1)
+            actor_to_movies.setdefault(actor2, set()).add(movie)
+            movie_to_actors.setdefault(movie, set()).add(actor2)
+            
         actor_to_movies.setdefault(actor1, set()).add(movie)
-        actor_to_movies.setdefault(actor2, set()).add(movie)
         movie_to_actors.setdefault(movie, set()).add(actor1)
-        movie_to_actors.setdefault(movie, set()).add(actor2)
         
     return {
         'name_to_id': names,
