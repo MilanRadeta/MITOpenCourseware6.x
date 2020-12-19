@@ -66,7 +66,22 @@ def actors_with_bacon_number(data, n):
 
 
 def bacon_path(data, actor_id):
-    raise NotImplementedError("Implement me!")
+    nodes = [{
+        'id': 4724,
+        'path': [4724]
+    }]
+    processed = set()
+    while len(nodes) > 0:
+        node = nodes.pop(0)
+        processed.add(node['id'])
+        if node['id'] == actor_id:
+            return node['path']
+        children = data['actor_to_actors'][node['id']]
+        
+        children = [{'id': child, 'path': node['path'] + [child]} for child in children if child not in processed]
+        nodes.extend(children)
+
+    return None
 
 
 def actor_to_actor_path(data, actor_id_1, actor_id_2):
