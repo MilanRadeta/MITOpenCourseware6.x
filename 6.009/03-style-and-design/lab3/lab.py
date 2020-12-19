@@ -66,16 +66,20 @@ def actors_with_bacon_number(data, n):
 
 
 def bacon_path(data, actor_id):
+    return actor_to_actor_path(data, 4724, actor_id)
+
+
+def actor_to_actor_path(data, actor_id_1, actor_id_2):
     nodes = [{
-        'id': 4724,
-        'path': [4724]
+        'id': actor_id_1,
+        'path': [actor_id_1]
     }]
     processed = set()
     i = 0
     while len(nodes) > i:
         node = nodes[i]
         processed.add(node['id'])
-        if node['id'] == actor_id:
+        if node['id'] == actor_id_2:
             return node['path']
         children = data['actor_to_actors'].get(node['id'], [])
         children = [{'id': child, 'path': node['path'] + [child]} for child in children if child not in processed]
@@ -83,10 +87,6 @@ def bacon_path(data, actor_id):
         i += 1
 
     return None
-
-
-def actor_to_actor_path(data, actor_id_1, actor_id_2):
-    raise NotImplementedError("Implement me!")
 
 
 def actor_path(data, actor_id_1, goal_test_function):
