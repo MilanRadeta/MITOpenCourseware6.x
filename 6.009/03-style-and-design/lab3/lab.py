@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import pickle
+import pathlib
+
+root_folder = pathlib.Path(__file__).parent.absolute().__str__()
 # NO ADDITIONAL IMPORTS ALLOWED!
 
 # Note that part of your checkoff grade for this lab will be based on the
@@ -38,11 +41,33 @@ def actors_connecting_films(data, film1, film2):
     raise NotImplementedError("Implement me!")
 
 
-if __name__ == '__main__':
-    with open('resources/small.pickle', 'rb') as f:
-        smalldb = pickle.load(f)
+TINY_PICKLE = root_folder + '/resources/tiny.pickle'
+SMALL_PICKLE = root_folder + '/resources/small.pickle'
+LARGE_PICKLE = root_folder + '/resources/large.pickle'
 
+SMALL_NAMES_PICKLE = root_folder + '/resources/small_names.pickle'
+NAMES_PICKLE = root_folder + '/resources/names.pickle'
+
+MOVIES_PICKLE = root_folder + '/resources/movies.pickle'
+
+if __name__ == '__main__':
+    with open(SMALL_PICKLE, 'rb') as f:
+        smalldb = pickle.load(f)
+    
     # additional code here will be run only when lab.py is invoked directly
     # (not when imported from test.py), so this is a good place to put code
     # used, for example, to generate the results for the online questions.
-    pass
+    with open(NAMES_PICKLE, 'rb') as f:
+        names = pickle.load(f)
+    
+    ids = {names[name]: name for name in names}
+    
+    print('Type of data loaded from %s is %s' % (NAMES_PICKLE, type(names)))
+    print('Keys are %s' % type(list(names.keys())[0]))
+    print('Values are %s' % type(list(names.values())[0]))
+    
+    name = "Julian O'Donnell"
+    print("%s's ID: %s" % (name, names[name]))
+    
+    id = 1319278
+    print("Actor with ID %s: %s" % (id, ids[id]))
