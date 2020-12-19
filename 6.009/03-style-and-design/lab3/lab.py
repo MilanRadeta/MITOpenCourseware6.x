@@ -114,7 +114,17 @@ def actor_path(data, actor_id_1, goal_test_function):
 
 
 def actors_connecting_films(data, film1, film2):
-    raise NotImplementedError("Implement me!")
+    movie_to_actors = data['movie_to_actors']
+    actor_to_movies = data['actor_to_movies']
+    actors1 = movie_to_actors[film1]
+    min_len = None
+    best = None
+    for id in actors1:
+        path = actor_path(data, id, lambda id: film2 in actor_to_movies[id])
+        if best is None or min_len > len(path):
+            best = path
+            min_len = len(path)
+    return best
 
 def convert(data, val, key):
     if type(val) in (list, tuple, set):
