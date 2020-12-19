@@ -152,3 +152,11 @@ if __name__ == '__main__':
     path = bacon_path(large_data, id)
     path = [large_data['id_to_name'][id] for id in path]
     print('Bacon path to %s: %s' % (name, path))
+
+    name = 'Gregory Michaels'
+    id = large_data['name_to_id'][name]
+    name = 'Michael Yarmush'
+    id = [id, large_data['name_to_id'][name]]
+    path = actor_to_actor_path(large_data, id[0], id[1])
+    path = [large_data['id_to_name'][id] for id in path]
+    print('Path from %s to %s: %s' % (path[0], path[-1], path))
