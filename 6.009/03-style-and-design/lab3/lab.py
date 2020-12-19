@@ -32,7 +32,7 @@ def transform_data(raw_data):
             actor_to_actors.setdefault(actor2, set()).add(actor1)
             actor_to_movies.setdefault(actor2, set()).add(movie)
             movie_to_actors.setdefault(movie, set()).add(actor2)
-            
+
         actor_to_movies.setdefault(actor1, set()).add(movie)
         movie_to_actors.setdefault(movie, set()).add(actor1)
         
@@ -89,10 +89,9 @@ if __name__ == '__main__':
     # additional code here will be run only when lab.py is invoked directly
     # (not when imported from test.py), so this is a good place to put code
     # used, for example, to generate the results for the online questions.
-    with open(NAMES_PICKLE, 'rb') as f:
-        names = pickle.load(f)
-    
-    ids = {names[name]: name for name in names}
+    data = transform_data(smalldb)
+    names = data['name_to_id']
+    ids = data['id_to_name']
     
     print('Type of data loaded from %s is %s' % (NAMES_PICKLE, type(names)))
     print('Keys are %s' % type(list(names.keys())[0]))
@@ -103,3 +102,11 @@ if __name__ == '__main__':
     
     id = 1319278
     print("Actor with ID %s: %s" % (id, ids[id]))
+
+    coactors = [
+        ('Toi Svane Stepp', 'Cory Pendergast'),
+        ('Gerard Depardieu', 'Danny Aiello'),
+    ]
+
+    for actor1, actor2 in coactors:
+        print('%s acted with %s: %s' % (actor1, actor2, acted_together(data, names[actor1], names[actor2])))
