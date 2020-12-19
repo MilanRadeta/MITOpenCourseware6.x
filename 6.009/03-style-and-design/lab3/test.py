@@ -46,6 +46,22 @@ def test_tiny_acted_together():
     actor2 = 1532
     assert lab.acted_together(db_tiny, actor1, actor2)
 
+def test_tiny_bacon_number_00():
+    # Simple test, same actor
+    assert lab.actors_with_bacon_number(db_tiny, 0) == { 4724 }
+
+def test_tiny_bacon_number_01():
+    # Simple test, same actor
+    assert lab.actors_with_bacon_number(db_tiny, 1) == { 2876, 1532 }
+
+def test_tiny_bacon_number_02():
+    # Simple test, same actor
+    assert lab.actors_with_bacon_number(db_tiny, 2) == { 1640 }
+
+def test_tiny_bacon_number_03():
+    # Simple test, same actor
+    assert lab.actors_with_bacon_number(db_tiny, 3) == set()
+
 
 def test_bacon_number_01():
     # Actors with Bacon number of 2
