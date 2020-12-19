@@ -145,4 +145,10 @@ if __name__ == '__main__':
     print(actor_names)
 
     path = bacon_path(large_data, 1204)
-    print('Bacon path to Julia Roberts: %s' % (path,))
+    print('Bacon path to Julia Roberts: %s' % (path))
+
+    name = 'Katherine Griffith'
+    id = large_data['name_to_id'][name]
+    path = bacon_path(large_data, id)
+    path = [large_data['id_to_name'][id] for id in path]
+    print('Bacon path to %s: %s' % (name, path))
