@@ -71,15 +71,16 @@ def bacon_path(data, actor_id):
         'path': [4724]
     }]
     processed = set()
-    while len(nodes) > 0:
-        node = nodes.pop(0)
+    i = 0
+    while len(nodes) > i:
+        node = nodes[i]
         processed.add(node['id'])
         if node['id'] == actor_id:
             return node['path']
-        children = data['actor_to_actors'][node['id']]
-        
+        children = data['actor_to_actors'].get(node['id'], [])
         children = [{'id': child, 'path': node['path'] + [child]} for child in children if child not in processed]
         nodes.extend(children)
+        i += 1
 
     return None
 
@@ -142,3 +143,6 @@ if __name__ == '__main__':
     actor_names = [large_data['id_to_name'][id] for id in actor_ids]
     print('Actors with Bacon number 6:')
     print(actor_names)
+
+    path = bacon_path(large_data, 1204)
+    print('Bacon path to Julia Roberts: %s' % (path,))
