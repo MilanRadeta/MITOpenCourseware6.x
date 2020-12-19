@@ -50,15 +50,17 @@ def transform_data(raw_data):
 
 
 def acted_together(data, actor_id_1, actor_id_2):
-    return actor_id_1 == actor_id_2 or actor_id_2 in data['actor_to_actors'][actor_id_1]
+    actor_to_actors = data['actor_to_actors']
+    return actor_id_1 == actor_id_2 or actor_id_2 in actor_to_actors[actor_id_1]
 
 
 def actors_with_bacon_number(data, n):
+    actor_to_actors = data['actor_to_actors']
     ids = { 4724 }
     processed = set()
     while n > 0 and len(ids) > 0:
         n -= 1
-        new_ids = {actor_id for id in ids for actor_id in data['actor_to_actors'][id] if actor_id not in processed and actor_id not in ids}
+        new_ids = {actor_id for id in ids for actor_id in actor_to_actors[id] if actor_id not in processed and actor_id not in ids}
         processed.update(ids)
         ids = new_ids
 
@@ -70,6 +72,7 @@ def bacon_path(data, actor_id):
 
 
 def actor_to_actor_path(data, actor_id_1, actor_id_2):
+    actor_to_actors = data['actor_to_actors']
     nodes = [{
         'id': actor_id_1,
         'path': [actor_id_1]
@@ -81,13 +84,30 @@ def actor_to_actor_path(data, actor_id_1, actor_id_2):
         processed.add(node['id'])
         if node['id'] == actor_id_2:
             return node['path']
-        children = data['actor_to_actors'].get(node['id'], [])
-        children = [{'id': child, 'path': node['path'] + [child]} for child in children if child not in processed]
+        children = actor_to_actors.get(node['id'], [])
+        children = [{
+            'id': child,
+            'path': node['path'] + [child]
+        } for child in children if child not in processed]
         nodes.extend(children)
         i += 1
 
     return None
 
+
+def movies_for_actor_path(data, path):
+    actor_to_movies = data['actor_to_movies']
+    prev = None
+    result = []
+    for id in path:
+        if prev is None:
+            prev = id
+            continue
+        movies = actor_to_movies[prev].intersection(actor_to_movies[id]),
+        movie = next(iter(movies[0]))
+        result.append(movie)
+        prev = id
+    return result
 
 def actor_path(data, actor_id_1, goal_test_function):
     raise NotImplementedError("Implement me!")
@@ -96,6 +116,10 @@ def actor_path(data, actor_id_1, goal_test_function):
 def actors_connecting_films(data, film1, film2):
     raise NotImplementedError("Implement me!")
 
+def convert(data, val, key):
+    if type(val) in (list, tuple, set):
+        return type(val)(data[key][v] for v in val)
+    return data[key][val]
 
 TINY_PICKLE = root_folder + '/resources/tiny.pickle'
 SMALL_PICKLE = root_folder + '/resources/small.pickle'
@@ -140,7 +164,7 @@ if __name__ == '__main__':
         print('%s acted with %s: %s' % (actor1, actor2, acted_together(small_data, names[actor1], names[actor2])))
 
     actor_ids = actors_with_bacon_number(large_data, 6)
-    actor_names = [large_data['id_to_name'][id] for id in actor_ids]
+    actor_names = convert(large_data, actor_ids, 'id_to_name')
     print('Actors with Bacon number 6:')
     print(actor_names)
 
@@ -148,15 +172,26 @@ if __name__ == '__main__':
     print('Bacon path to Julia Roberts: %s' % (path))
 
     name = 'Katherine Griffith'
-    id = large_data['name_to_id'][name]
+    id = convert(large_data, name, 'name_to_id')
     path = bacon_path(large_data, id)
-    path = [large_data['id_to_name'][id] for id in path]
+    path = convert(large_data, path, 'id_to_name')
     print('Bacon path to %s: %s' % (name, path))
 
-    name = 'Gregory Michaels'
-    id = large_data['name_to_id'][name]
-    name = 'Michael Yarmush'
-    id = [id, large_data['name_to_id'][name]]
-    path = actor_to_actor_path(large_data, id[0], id[1])
-    path = [large_data['id_to_name'][id] for id in path]
-    print('Path from %s to %s: %s' % (path[0], path[-1], path))
+    names = ('Gregory Michaels', 'Michael Yarmush')
+    ids = convert(large_data, names, 'name_to_id')
+    path = actor_to_actor_path(large_data, ids[0], ids[1])
+    path = convert(large_data, path, 'id_to_name')
+    print('Path from %s to %s: %s' % (names[0], names[1], path))
+
+    names = ('Kevin Bacon', 'Julia Roberts')
+    ids = convert(large_data, names, 'name_to_id')
+    path = actor_to_actor_path(large_data, ids[0], ids[1])
+    path = movies_for_actor_path(large_data, path)
+    print('Movie path from %s to %s: %s' % (names[0], names[1], path))
+
+    names = ('Kathleen Quinlan', 'Iva Ilakovac')
+    ids = convert(large_data, names, 'name_to_id')
+    path = actor_to_actor_path(large_data, ids[0], ids[1])
+    path = movies_for_actor_path(large_data, path)
+    path = convert(large_data, path, 'id_to_movie')
+    print('Movie path from %s to %s: %s' % (names[0], names[1], path))
