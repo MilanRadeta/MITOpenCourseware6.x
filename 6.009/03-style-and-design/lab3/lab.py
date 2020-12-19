@@ -93,13 +93,17 @@ MOVIES_PICKLE = root_folder + '/resources/movies.pickle'
 if __name__ == '__main__':
     with open(SMALL_PICKLE, 'rb') as f:
         smalldb = pickle.load(f)
+    with open(LARGE_PICKLE, 'rb') as f:
+        large_db = pickle.load(f)
     
     # additional code here will be run only when lab.py is invoked directly
     # (not when imported from test.py), so this is a good place to put code
     # used, for example, to generate the results for the online questions.
-    data = transform_data(smalldb)
-    names = data['name_to_id']
-    ids = data['id_to_name']
+    small_data = transform_data(smalldb)
+    large_data = transform_data(large_db)
+
+    names = small_data['name_to_id']
+    ids = small_data['id_to_name']
     
     print('Type of data loaded from %s is %s' % (NAMES_PICKLE, type(names)))
     print('Keys are %s' % type(list(names.keys())[0]))
@@ -117,4 +121,9 @@ if __name__ == '__main__':
     ]
 
     for actor1, actor2 in coactors:
-        print('%s acted with %s: %s' % (actor1, actor2, acted_together(data, names[actor1], names[actor2])))
+        print('%s acted with %s: %s' % (actor1, actor2, acted_together(small_data, names[actor1], names[actor2])))
+
+    actor_ids = actors_with_bacon_number(large_data, 6)
+    actor_names = [large_data['id_to_name'][id] for id in actor_ids]
+    print('Actors with Bacon number 6:')
+    print(actor_names)
