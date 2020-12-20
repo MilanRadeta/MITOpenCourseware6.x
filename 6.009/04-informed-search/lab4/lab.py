@@ -86,7 +86,28 @@ def find_short_path_nodes(aux_structures, node1, node2):
         a list of node IDs representing the shortest path (in terms of
         distance) from node1 to node2
     """
-    raise NotImplementedError
+    digraph = aux_structures['digraph']
+    distances = aux_structures['distances']
+    agenda = [(node1, (node1,), 0)]
+    expanded = set()
+    while len(agenda) > 0:
+        node, path, cost = agenda.pop()
+        if node in expanded:
+            continue
+        
+        if node == node2:
+            return path
+        expanded.add(node)
+        children = digraph.get(node, set())
+        children = {
+            (child, path + (child,), cost + distances[(node, child)])
+            for child in children
+            if child not in expanded
+        }
+        agenda.extend(children)
+        agenda.sort(key=lambda item: item[2], reverse=True)
+
+    return None
 
 
 def find_short_path(aux_structures, loc1, loc2):
