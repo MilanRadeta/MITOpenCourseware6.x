@@ -304,7 +304,17 @@ def render_2d(game, xray=False):
     ...                   [False, False, False, True]]}, True)
     [['.', '3', '1', ' '], ['.', '.', '1', ' ']]
     """
-    raise NotImplementedError
+    rows, cols = game['dimensions']
+    board = game['board']
+    mask = game['mask']
+    result = []
+    for i in range(rows):
+        result.append([])
+        for j in range(cols):
+            cell = board[i][j]
+            val = (' ' if cell == 0 else str(cell)) if xray or mask[i][j] else '_'
+            result[-1].append(val)
+    return result
 
 
 def render_ascii(game, xray=False):
@@ -331,7 +341,9 @@ def render_ascii(game, xray=False):
     .31_
     __1_
     """
-    raise NotImplementedError
+    result = render_2d(game, xray)
+    result = [''.join(row) for row in result]
+    return '\n'.join(result)
 
 
 
