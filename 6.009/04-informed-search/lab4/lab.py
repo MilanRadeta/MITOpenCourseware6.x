@@ -92,9 +92,17 @@ def find_fast_path(aux_structures, loc1, loc2):
     """
     raise NotImplementedError
 
+def distance_between_nodes(node1, node2):
+    loc1 = (node1['lat'], node1['lon'])
+    loc2 = (node2['lat'], node2['lon'])
+    return great_circle_distance(loc1, loc2)
 
-PICKLE_NODES = root_folder + '/resources/cambridge.nodes'
-PICKLE_WAYS = root_folder + '/resources/cambridge.ways'
+
+CAMBRIDGE_NODES = root_folder + '/resources/cambridge.nodes'
+CAMBRIDGE_WAYS = root_folder + '/resources/cambridge.ways'
+
+MIDWEST_NODES = root_folder + '/resources/midwest.nodes'
+MIDWEST_WAYS = root_folder + '/resources/midwest.ways'
 
 if __name__ == '__main__':
     # additional code here will be run only when lab.py is invoked directly
@@ -104,7 +112,7 @@ if __name__ == '__main__':
     name_count = 0
     id = None
     name = '77 Massachusetts Ave'
-    for node in read_osm_data(PICKLE_NODES):
+    for node in read_osm_data(CAMBRIDGE_NODES):
         nodes_count += 1
         node_name = node['tags'].get('name', None)
         if node_name is not None:
@@ -117,11 +125,52 @@ if __name__ == '__main__':
     
     ways_count = 0
     one_way_count = 0
-    for way in read_osm_data(PICKLE_WAYS):
+    for way in read_osm_data(CAMBRIDGE_WAYS):
         ways_count += 1
-        one_way = way['tags'].get('oneway', False)
+        one_way = way['tags'].get('oneway', 'no')
         if one_way == 'yes':
             one_way_count += 1
     
     print('%s ways' % ways_count)
     print('%s one-way streets' % one_way_count)
+
+    loc1 = (42.363745, -71.100999)
+    loc2 = (42.361283, -71.239677)
+    dist = great_circle_distance(loc1, loc2)
+    print('Distance between %s and %s: %s miles' % (loc1, loc2, dist))
+    
+    nodes = {
+        233941454: None,
+        233947199: None
+    }
+    count = 0
+    for node in read_osm_data(MIDWEST_NODES):
+        id = node['id']
+        if id in nodes:
+            count += 1
+            nodes[id] = node
+            if count == 2:
+                break
+    nodes = tuple(nodes.values())
+    dist = distance_between_nodes(nodes[0], nodes[1])
+    print('Distance between %s and %s: %s miles' % (233941454, 233947199, dist))
+
+    id = 21705939
+    way = None
+    for way in read_osm_data(MIDWEST_WAYS):
+        if way['id'] == id:
+            break
+
+    nodes = {}
+    path = way['nodes']
+    for node in read_osm_data(MIDWEST_NODES):
+        id = node['id']
+        if id in path:
+            nodes[id] = node
+            if len(nodes) == len(path):
+                break
+
+    dist = 0
+    for i in range(len(path) - 1):
+        dist += distance_between_nodes(nodes[path[i]], nodes[path[i+1]])
+    print('Total length of way with id %s: %s miles' % (way['id'], dist))
