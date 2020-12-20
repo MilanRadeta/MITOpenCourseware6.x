@@ -59,18 +59,21 @@ def build_auxiliary_structures(nodes_filename, ways_filename):
             is_one_way = way['tags'].get('oneway', 'no') == 'yes'
             speed = way['tags'].get('maxspeed_mph', DEFAULT_SPEED_LIMIT_MPH[highway])
             for i in range(len(path) - 1):
-                ids = (path[i], path[i+1])
-                for id in ids:
+                all_ids = (path[i], path[i+1])
+
+                for id in all_ids:
                     nodes[id] = all_nodes[id]
                     locations[id] = nodes[id]['loc']
-                    if speed > speeds.get(id, 0):
-                        speeds[id] = speed
-                distance = distance_between_node_ids(nodes, ids[0], ids[1])
+                distance = distance_between_node_ids(nodes, all_ids[0], all_ids[1])
 
-                distances[ids] = distance
-                digraph.setdefault(ids[0], set()).add(ids[1])
-                if not is_one_way:
-                    ids = (ids[1], ids[0])
+                if is_one_way:
+                    all_ids = [all_ids]
+                else:
+                    all_ids = [all_ids, (all_ids[1], all_ids[0])]
+
+                for ids in all_ids:
+                    if speed > speeds.get(ids, 0):
+                        speeds[ids] = speed
                     distances[ids] = distance
                     digraph.setdefault(ids[0], set()).add(ids[1])
     
@@ -98,9 +101,9 @@ def find_short_path_nodes(aux_structures, node1, node2, cost_fun=None, heuristic
         distance) from node1 to node2
     """
     if heuristic is None:
-        heuristic = lambda item, goal: 0
+        heuristic = lambda path, goal: 0
     if cost_fun is None:
-        cost_fun = lambda prev_item, item: distances[(prev_item, item)]
+        cost_fun = lambda path: distances[path[-2:]]
     digraph = aux_structures['digraph']
     distances = aux_structures['distances']
     agenda = [(node1, (node1,), 0)]
@@ -118,12 +121,11 @@ def find_short_path_nodes(aux_structures, node1, node2, cost_fun=None, heuristic
                 print('Total pull-offs: %s' % total_count)
             return path
         expanded.add(node)
-        children = digraph.get(node, set())
-        children = {
-            (child, path + (child,), cost + cost_fun(node, child) + heuristic(child, node2))
-            for child in children
-            if child not in expanded
-        }
+        children = []
+        for child in digraph.get(node, set()):
+            if child not in expanded:
+                new_path = path + (child,)
+                children.append((child, new_path, cost + cost_fun(new_path) + heuristic(path, node2)))
         agenda.extend(children)
         agenda.sort(key=lambda item: item[2], reverse=True)
 
@@ -164,8 +166,8 @@ def find_short_path(aux_structures, loc1, loc2, cost_fun=None, heuristic=None, v
         a list of (latitude, longitude) tuples representing the shortest path
         (in terms of distance) from loc1 to loc2.
     """
-    found = get_closest_nodes((loc1, loc2))
-    result = find_short_path_nodes(aux_structures, found[0], found[1], cost_fun=cost_fun, heuristic=heuristic, verbose=verbose)
+    nodes = get_closest_nodes(aux_structures, (loc1, loc2))
+    result = find_short_path_nodes(aux_structures, nodes[0], nodes[1], cost_fun=cost_fun, heuristic=heuristic, verbose=verbose)
     if result is None:
         return result
 
@@ -191,16 +193,14 @@ def find_fast_path(aux_structures, loc1, loc2):
         a list of (latitude, longitude) tuples representing the shortest path
         (in terms of time) from loc1 to loc2.
     """
-    found = get_closest_nodes(aux_structures, (loc1, loc2))
+    nodes = get_closest_nodes(aux_structures, (loc1, loc2))
     locs = aux_structures['locations']
     speeds = aux_structures['speeds']
     distances = aux_structures['distances']
-    cost_fun = lambda prev_item, item: distances[(prev_item, item)] / speeds[item]
-    # cost_fun = lambda prev_item, item: distances[(prev_item, item)] / ((speeds[item] + speeds[prev_item]) / 2)
-    # heuristic = lambda item, goal: speeds[item]
-    heuristic = lambda item, goal: great_circle_distance(locs[item], locs[goal]) / speeds[item]
-    # heuristic = None
-    result = find_short_path_nodes(aux_structures, found[0], found[1], cost_fun=cost_fun, heuristic=heuristic)
+
+    cost_fun = lambda path: distances[path[-2:]] / speeds[path[-2:]]
+    heuristic = None
+    result = find_short_path_nodes(aux_structures, nodes[0], nodes[1], cost_fun=cost_fun, heuristic=heuristic)
     if result is None:
         return result
 
@@ -310,7 +310,7 @@ if __name__ == '__main__':
     loc1 = (42.3858, -71.0783)
     loc2 = (42.5465, -71.1787)
     path1 = find_short_path(cambridge_structure, loc1, loc2, verbose=True)
-    path2 = find_short_path(cambridge_structure, loc1, loc2, verbose=True, heuristic=lambda item, goal: great_circle_distance(locs[item], locs[goal]))
+    path2 = find_short_path(cambridge_structure, loc1, loc2, verbose=True, heuristic=lambda path, goal: great_circle_distance(locs[path[-1]], locs[goal]))
     print('Path lengths: %s vs %s' % (len(path1), len(path2)))
 
 
