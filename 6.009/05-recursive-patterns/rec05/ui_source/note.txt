@@ -1,0 +1,4 @@
+This directory contains the ui "source" files that are used with the
+older make_assignment.py script. That script manipulates/inserts
+javascript include-files to get to the actual "/ui" directory and
+files to make the user interface work.

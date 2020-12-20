@@ -1,0 +1,35 @@
+<h3>Select a tent:</h3>
+
+<div>
+  <p>
+    Selected tent: "<span id="current_test"></span>"
+    <!-- Left aligned menu on top of button  -->
+    <button id="select_test" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">...</button>
+    <div class="mdl-tooltip" for="select_test">
+      Select another test case.
+    </div>
+    <ul id="test_cases" class="mdl-menu mdl-js-menu mdl-js-ripple-effect" for="select_test">
+    </ul>
+  </p>
+</div>
+
+<p>
+  <span id="lab_message"></span>
+</p>
+
+<div id="drawing"></div>
+
+<br>
+
+<div>
+  <button id="solve" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" onclick="handle_solve()">
+    Pack!
+  </button>
+  <div class="mdl-tooltip" for="solve">
+    Pack this tent!
+  </div>
+</div>
+
+<p>
+  In the 6.009 camping trip, all space not occupied by rocks must be packed full of students: a packing <b>leaves no empty space</b>.
+</p>
