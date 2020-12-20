@@ -37,7 +37,40 @@ def build_auxiliary_structures(nodes_filename, ways_filename):
     Create any auxiliary structures you are interested in, by reading the data
     from the given filenames (using read_osm_data)
     """
-    return None
+    nodes = {}
+    for node in read_osm_data(nodes_filename):
+        id = node['id']
+        nodes[id] = node
+
+    ways = {}
+    digraph = {}
+    distances = {}
+    for way in read_osm_data(ways_filename):
+        id = way['id']
+        highway = way['tags'].get('highway', None)
+        if highway in ALLOWED_HIGHWAY_TYPES:
+            ways[id] = way
+            path = way['nodes']
+            is_one_way = way['tags'].get('oneway', 'no') == 'yes'
+            for i in range(len(path) - 1):
+                ids = (path[i], path[i+1])
+                distance = distance_between_node_ids(nodes, ids[0], ids[1])
+
+                distances[ids] = distance
+                digraph.setdefault(ids[0], set()).add(ids[1])
+                if not is_one_way:
+                    ids = (ids[1], ids[0])
+                    distances[ids] = distance
+                    digraph.setdefault(ids[0], set()).add(ids[1])
+    
+    return {
+        'nodes': nodes,
+        'ways': ways,
+        'digraph': digraph,
+        'distances': distances
+    }
+
+
 
 
 def find_short_path_nodes(aux_structures, node1, node2):
@@ -97,12 +130,20 @@ def distance_between_nodes(node1, node2):
     loc2 = (node2['lat'], node2['lon'])
     return great_circle_distance(loc1, loc2)
 
+def distance_between_node_ids(nodes, node1, node2):
+    node1 = nodes[node1]
+    node2 = nodes[node2]
+    return distance_between_nodes(node1, node2)
+
 
 CAMBRIDGE_NODES = root_folder + '/resources/cambridge.nodes'
 CAMBRIDGE_WAYS = root_folder + '/resources/cambridge.ways'
 
 MIDWEST_NODES = root_folder + '/resources/midwest.nodes'
 MIDWEST_WAYS = root_folder + '/resources/midwest.ways'
+
+MIT_NODES = root_folder + '/resources/mit.nodes'
+MIT_WAYS = root_folder + '/resources/mit.ways'
 
 if __name__ == '__main__':
     # additional code here will be run only when lab.py is invoked directly
@@ -151,9 +192,9 @@ if __name__ == '__main__':
             nodes[id] = node
             if count == 2:
                 break
-    nodes = tuple(nodes.values())
-    dist = distance_between_nodes(nodes[0], nodes[1])
-    print('Distance between %s and %s: %s miles' % (233941454, 233947199, dist))
+    ids = tuple(nodes.keys())
+    dist = distance_between_node_ids(nodes, ids[0], ids[1])
+    print('Distance between %s and %s: %s miles' % (ids[0], ids[1], dist))
 
     id = 21705939
     way = None
@@ -172,5 +213,8 @@ if __name__ == '__main__':
 
     dist = 0
     for i in range(len(path) - 1):
-        dist += distance_between_nodes(nodes[path[i]], nodes[path[i+1]])
+        dist += distance_between_node_ids(nodes, path[i], path[i+1])
     print('Total length of way with id %s: %s miles' % (way['id'], dist))
+
+    mit_structure = build_auxiliary_structures(MIT_NODES, MIT_WAYS)
+    pass
