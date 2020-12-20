@@ -76,7 +76,7 @@ def build_auxiliary_structures(nodes_filename, ways_filename):
     }
 
 
-def find_short_path_nodes(aux_structures, node1, node2):
+def find_short_path_nodes(aux_structures, node1, node2, heuristic=None, verbose=False):
     """
     Return the shortest path between the two nodes
 
@@ -89,21 +89,28 @@ def find_short_path_nodes(aux_structures, node1, node2):
         a list of node IDs representing the shortest path (in terms of
         distance) from node1 to node2
     """
+    if heuristic is None:
+        heuristic = lambda item, goal: 0
     digraph = aux_structures['digraph']
     distances = aux_structures['distances']
     agenda = [(node1, (node1,), 0)]
     expanded = set()
+    total_count = 0
     while len(agenda) > 0:
         node, path, cost = agenda.pop()
+        total_count += 1
         if node in expanded:
             continue
         
         if node == node2:
+            if verbose:
+                print('Processed paths: %s' % len(expanded))
+                print('Total pull-offs: %s' % total_count)
             return path
         expanded.add(node)
         children = digraph.get(node, set())
         children = {
-            (child, path + (child,), cost + distances[(node, child)])
+            (child, path + (child,), cost + distances[(node, child)] + heuristic(child, node2))
             for child in children
             if child not in expanded
         }
@@ -125,7 +132,7 @@ def get_closest_node(aux_structures, loc):
     return best
 
 
-def find_short_path(aux_structures, loc1, loc2):
+def find_short_path(aux_structures, loc1, loc2, heuristic=None, verbose=False):
     """
     Return the shortest path between the two locations
 
@@ -145,7 +152,7 @@ def find_short_path(aux_structures, loc1, loc2):
         best = get_closest_node(aux_structures, loc)
         found.append(best)
         
-    result = find_short_path_nodes(aux_structures, found[0], found[1])
+    result = find_short_path_nodes(aux_structures, found[0], found[1], heuristic=heuristic, verbose=verbose)
     if result is None:
         return result
 
@@ -268,3 +275,13 @@ if __name__ == '__main__':
     loc = (41.4452463, -89.3161394)
     best = get_closest_node(midwest_structure, loc)
     print('Nearest relevant node to the location %s has id %s' % (loc, best))
+
+    cambridge_structure = build_auxiliary_structures(CAMBRIDGE_NODES, CAMBRIDGE_WAYS)
+    nodes = cambridge_structure['nodes']
+    loc1 = (42.3858, -71.0783)
+    loc2 = (42.5465, -71.1787)
+    path1 = find_short_path(cambridge_structure, loc1, loc2, verbose=True)
+    path2 = find_short_path(cambridge_structure, loc1, loc2, verbose=True, heuristic=lambda item, goal: great_circle_distance(nodes[item]['loc'], nodes[goal]['loc']))
+    print('Path lengths: %s vs %s' % (len(path1), len(path2)))
+
+
