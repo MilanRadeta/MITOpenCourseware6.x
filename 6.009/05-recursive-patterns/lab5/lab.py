@@ -15,6 +15,28 @@ def dump(game):
         else:
             print(f'{key}:', val)
 
+def new_nd_list(dimensions, val=0):
+    """
+    Creates an n-dimensional array recursively.
+    
+    Parameters:
+        dimensions (tuple): Tuple of ints, representing each dimension size
+        val (any): Default value for cells
+
+    Returns:
+        Return an n-dimensional list.
+
+    >>> new_nd_list((3,2), 5)
+    [[5, 5], [5, 5], [5, 5]]
+
+    >>> new_nd_list((4,3,2), '1')
+    [[['1', '1'], ['1', '1'], ['1', '1']], [['1', '1'], ['1', '1'], ['1', '1']], [['1', '1'], ['1', '1'], ['1', '1']], [['1', '1'], ['1', '1'], ['1', '1']]]
+    """
+    if len(dimensions) == 0:
+        return val
+
+    dim = dimensions[0]
+    return [new_nd_list(dimensions[1:], val) for i in range(dim)]
 
 # 2-D IMPLEMENTATION
 
@@ -45,21 +67,16 @@ def new_game_2d(num_rows, num_cols, bombs):
         [False, False, False, False]
     state: ongoing
     """
-    board = []
-    for r in range(num_rows):
-        row = []
-        for c in range(num_cols):
-            if [r,c] in bombs or (r,c) in bombs:
-                row.append('.')
-            else:
-                row.append(0)
-        board.append(row)
-    mask = []
-    for r in range(num_rows):
-        row = []
-        for c in range(num_cols):
-            row.append(False)
-        mask.append(row)
+    dimension = (num_rows, num_cols)
+    board = new_nd_list(dimension, 0)
+    mask = new_nd_list(dimension, False)
+
+    for bomb in bombs:
+        cell = board
+        for i in bomb[:-1]:
+            cell = cell[i]
+        cell[bomb[-1]] = '.'
+
     for r in range(num_rows):
         for c in range(num_cols):
             if board[r][c] == 0:
@@ -476,7 +493,7 @@ if __name__ == "__main__":
     # Test with doctests. Helpful to debug individual lab.py functions.
     import doctest
     _doctest_flags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
-    doctest.testmod(optionflags=_doctest_flags) #runs ALL doctests
+    # doctest.testmod(optionflags=_doctest_flags) #runs ALL doctests
 
     # Alternatively, can run the doctests JUST for specified function/methods,
     # e.g., for render_2d or any other function you might want.  To do so, comment
@@ -485,4 +502,4 @@ if __name__ == "__main__":
     # verbose flag can be set to True to see all test results, including those
     # that pass.
     #
-    #doctest.run_docstring_examples(render_2d, globals(), optionflags=_doctest_flags, verbose=False)
+    doctest.run_docstring_examples(new_game_2d, globals(), optionflags=_doctest_flags, verbose=False)
