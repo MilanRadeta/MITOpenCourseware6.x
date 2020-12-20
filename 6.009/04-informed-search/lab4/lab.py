@@ -37,11 +37,14 @@ def build_auxiliary_structures(nodes_filename, ways_filename):
     Create any auxiliary structures you are interested in, by reading the data
     from the given filenames (using read_osm_data)
     """
-    nodes = {}
+    all_nodes = {}
     for node in read_osm_data(nodes_filename):
         id = node['id']
-        nodes[id] = node
+        node['loc'] = (node['lat'], node['lon'])
+        all_nodes[id] = node
 
+
+    nodes = {}
     ways = {}
     digraph = {}
     distances = {}
@@ -54,6 +57,8 @@ def build_auxiliary_structures(nodes_filename, ways_filename):
             is_one_way = way['tags'].get('oneway', 'no') == 'yes'
             for i in range(len(path) - 1):
                 ids = (path[i], path[i+1])
+                for id in ids:
+                    nodes[id] = all_nodes[id]
                 distance = distance_between_node_ids(nodes, ids[0], ids[1])
 
                 distances[ids] = distance
@@ -69,8 +74,6 @@ def build_auxiliary_structures(nodes_filename, ways_filename):
         'digraph': digraph,
         'distances': distances
     }
-
-
 
 
 def find_short_path_nodes(aux_structures, node1, node2):
@@ -110,6 +113,18 @@ def find_short_path_nodes(aux_structures, node1, node2):
     return None
 
 
+def get_closest_node(aux_structures, loc):
+    nodes = aux_structures['nodes']
+    best = None
+    min_cost = None
+    for node in nodes.values():
+        cost = great_circle_distance(node['loc'], loc)
+        if best is None or cost < min_cost:
+            best = node['id']
+            min_cost = cost
+    return best
+
+
 def find_short_path(aux_structures, loc1, loc2):
     """
     Return the shortest path between the two locations
@@ -125,7 +140,19 @@ def find_short_path(aux_structures, loc1, loc2):
         a list of (latitude, longitude) tuples representing the shortest path
         (in terms of distance) from loc1 to loc2.
     """
-    raise NotImplementedError
+    found = []
+    for loc in (loc1, loc2):
+        best = get_closest_node(aux_structures, loc)
+        found.append(best)
+        
+    result = find_short_path_nodes(aux_structures, found[0], found[1])
+    if result is None:
+        return result
+
+    nodes = aux_structures['nodes']
+    result = tuple(nodes[id]['loc'] for id in result)
+
+    return result
 
 
 def find_fast_path(aux_structures, loc1, loc2):
@@ -237,5 +264,7 @@ if __name__ == '__main__':
         dist += distance_between_node_ids(nodes, path[i], path[i+1])
     print('Total length of way with id %s: %s miles' % (way['id'], dist))
 
-    mit_structure = build_auxiliary_structures(MIT_NODES, MIT_WAYS)
-    pass
+    midwest_structure = build_auxiliary_structures(MIDWEST_NODES, MIDWEST_WAYS)
+    loc = (41.4452463, -89.3161394)
+    best = get_closest_node(midwest_structure, loc)
+    print('Nearest relevant node to the location %s has id %s' % (loc, best))
