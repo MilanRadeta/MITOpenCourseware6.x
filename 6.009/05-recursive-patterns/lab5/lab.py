@@ -38,6 +38,36 @@ def new_nd_list(dimensions, val=0):
     dim = dimensions[0]
     return [new_nd_list(dimensions[1:], val) for i in range(dim)]
 
+def new_nd_diffs(n):
+    """
+    Creates an n-dimensional array recursively.
+    
+    Parameters:
+        n (int): Number of dimensions
+
+    Returns:
+        Returns a list of 3**n tuples of n diff values ranging from -1 to 1.
+
+    >>> new_nd_diffs(1)
+    [(-1,), (0,), (1,)]
+
+    >>> new_nd_diffs(2)
+    [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
+    """
+
+    if n == 0:
+        return []
+    base_diffs = [(i,) for i in range(-1, 2)]
+    if n == 1:
+        return base_diffs
+    
+    diffs = []
+    subdiffs = new_nd_diffs(n-1)
+    for diff in base_diffs:
+        for subdiff in subdiffs:
+            diffs.append(diff + subdiff)
+    return diffs
+
 # 2-D IMPLEMENTATION
 
 
@@ -502,4 +532,4 @@ if __name__ == "__main__":
     # verbose flag can be set to True to see all test results, including those
     # that pass.
     #
-    doctest.run_docstring_examples(new_game_2d, globals(), optionflags=_doctest_flags, verbose=False)
+    doctest.run_docstring_examples(new_nd_diffs, globals(), optionflags=_doctest_flags, verbose=False)
