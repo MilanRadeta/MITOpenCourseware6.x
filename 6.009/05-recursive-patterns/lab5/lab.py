@@ -66,6 +66,37 @@ def new_nd_diffs(n):
             diffs.append(diff + subdiff)
     return tuple(diffs)
 
+def get_surrounding_indexes(index):
+    """
+    Get tuple of indexes surrounding provided index and the provided index itself
+    by adding values of index with values of diffs provided by new_nd_diffs.
+
+    Each index is also an n-tuple of ints.
+
+    Parameters:
+        index (tuple): n-tuple of ints
+
+    Returns:
+        Returns a tuple of 3**n tuples of indexes surrounding the provided index and the provided index itself.
+
+    >>> get_surrounding_indexes((0,))
+    ((-1,), (0,), (1,))
+
+    >>> get_surrounding_indexes((3,))
+    ((2,), (3,), (4,))
+
+    >>> get_surrounding_indexes((0,0))
+    ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
+
+    >>> get_surrounding_indexes((2,2))
+    ((1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3))
+    """
+    diffs = new_nd_diffs(len(index))
+    result = []
+    for pair in zip((index,) * len(diffs), diffs):
+        result.append(tuple(map(sum, zip(*pair))))
+    return tuple(result)
+
 def get_innermost_list(board, index):
     """
     Given the n-dimensional board and n-tuple index,
@@ -174,8 +205,6 @@ def new_game_2d(num_rows, num_cols, bombs):
     dimensions = (num_rows, num_cols)
     board = new_nd_list(dimensions, 0)
     mask = new_nd_list(dimensions, False)
-    diffs = new_nd_diffs(len(dimensions))
-    len_diffs = len(diffs)
 
     def setter(val):
         if val is not None and val != '.':
@@ -185,15 +214,22 @@ def new_game_2d(num_rows, num_cols, bombs):
 
     for bomb in bombs:
         set_value(board, bomb, '.')
-        for pair in zip((bomb,) * len_diffs, diffs):
+        for index in get_surrounding_indexes(bomb):
             index = tuple(map(sum, zip(*pair)))
             set_value(board, index, setter)
+
+    covered = 1
+    for dim in dimensions:
+        covered *= dim
 
     return {
         'dimensions': dimensions,
         'board' : board,
         'mask' : mask,
-        'state': 'ongoing'}
+        'state': 'ongoing',
+        'revealed': 0,
+        'covered': covered
+    }
 
 
 def dig_2d(game, row, col):
@@ -263,34 +299,21 @@ def dig_2d(game, row, col):
     board = game['board']
     mask = game['mask']
 
+    if not get_value(mask, index):
+        return 0
+    set_value(mask, index, True)
+
+    game['revealed'] += 1
+    game['covered'] -= 1
+
     if get_value(board, index) == '.':
-        set_value(mask, index, True)
         game['state'] = 'defeat'
         return 1
-
-    bombs = 0
-    covered_squares = 0
-    for r in range(game['dimensions'][0]):
-        for c in range(game['dimensions'][1]):
-            if game['board'][r][c] == '.':
-                if  game['mask'][r][c] == True:
-                    bombs += 1
-            elif game['mask'][r][c] == False:
-                covered_squares += 1
-    if bombs != 0:
-        # if bombs is not equal to zero, set the game state to defeat and
-        # return 0
-        game['state'] = 'defeat'
-        return 0
-    if covered_squares == 0:
+    
+    if game['covered'] == 0:
         game['state'] = 'victory'
-        return 0
+        return 1
 
-    if game['mask'][row][col] != True:
-        game['mask'][row][col] = True
-        revealed = 1
-    else:
-        return 0
 
     if game['board'][row][col] == 0:
         num_rows, num_cols = game['dimensions']
@@ -576,4 +599,4 @@ if __name__ == "__main__":
     # verbose flag can be set to True to see all test results, including those
     # that pass.
     #
-    doctest.run_docstring_examples(new_game_2d, globals(), optionflags=_doctest_flags, verbose=False)
+    doctest.run_docstring_examples(get_surrounding_indexes, globals(), optionflags=_doctest_flags, verbose=False)
