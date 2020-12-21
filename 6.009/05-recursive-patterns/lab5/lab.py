@@ -40,24 +40,22 @@ def new_nd_list(dimensions, val=0):
 
 def new_nd_diffs(n):
     """
-    Creates an n-dimensional array recursively.
-    
     Parameters:
         n (int): Number of dimensions
 
     Returns:
-        Returns a list of 3**n tuples of n diff values ranging from -1 to 1.
+        Returns a tuple of 3**n tuples of n diff values ranging from -1 to 1.
 
     >>> new_nd_diffs(1)
-    [(-1,), (0,), (1,)]
+    ((-1,), (0,), (1,))
 
     >>> new_nd_diffs(2)
-    [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
+    ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
     """
 
     if n == 0:
         return []
-    base_diffs = [(i,) for i in range(-1, 2)]
+    base_diffs = tuple((i,) for i in range(-1, 2))
     if n == 1:
         return base_diffs
     
@@ -66,7 +64,40 @@ def new_nd_diffs(n):
     for diff in base_diffs:
         for subdiff in subdiffs:
             diffs.append(diff + subdiff)
-    return diffs
+    return tuple(diffs)
+
+def get_innermost_list(board, index):
+    """
+    Given the n-dimensional board and n-tuple index,
+    return the innermost list according to the specified index
+    along with last element from index.
+
+    Dimension of the board and size of index must be equal.
+
+    Parameters:
+        board (list): n-dimensional list
+        index (tuple): tuple with n values
+
+    Returns:
+        Returns a tuple (innermost_list, index[-1]) if index is valid, otherwise (None, None)
+
+    >>> get_innermost_list([[1, 2], [3, 4]], (1, 0))
+    ([3, 4], 0)
+    >>> get_innermost_list([[1, 2], [3, 4]], (-1, 2))
+    (None, None)
+    >>> get_innermost_list([[1, 2], [3, 4]], (-1, -1))
+    (None, None)
+    """
+    inner = board
+    for i in index[:-1]:
+        if i < 0 or i >= len(inner):
+            return None, None
+        inner = inner[i]
+    i = index[-1]
+    if i < 0 or i >= len(inner):
+        return None, None
+    return inner, i
+
 
 # 2-D IMPLEMENTATION
 
@@ -97,59 +128,23 @@ def new_game_2d(num_rows, num_cols, bombs):
         [False, False, False, False]
     state: ongoing
     """
-    dimension = (num_rows, num_cols)
-    board = new_nd_list(dimension, 0)
-    mask = new_nd_list(dimension, False)
+    dimensions = (num_rows, num_cols)
+    board = new_nd_list(dimensions, 0)
+    mask = new_nd_list(dimensions, False)
+    diffs = new_nd_diffs(len(dimensions))
+    len_diffs = len(diffs)
 
     for bomb in bombs:
-        cell = board
-        for i in bomb[:-1]:
-            cell = cell[i]
-        cell[bomb[-1]] = '.'
+        inner, i = get_innermost_list(board, bomb)
+        inner[i] = '.'
+        for pair in zip((bomb,) * len_diffs, diffs):
+            index = tuple(map(sum, zip(*pair)))
+            inner, i = get_innermost_list(board, index)
+            if inner is not None and inner[i] != '.':
+                inner[i] += 1
 
-    for r in range(num_rows):
-        for c in range(num_cols):
-            if board[r][c] == 0:
-                neighbor_bombs = 0
-                if 0 <= r-1 < num_rows:
-                    if 0 <= c-1 < num_cols:
-                        if board[r-1][c-1] == '.':
-                            neighbor_bombs += 1
-                if 0 <= r < num_rows:
-                    if 0 <= c-1 < num_cols:
-                        if board[r][c-1] == '.':
-                            neighbor_bombs += 1
-                if 0 <= r+1 < num_rows:
-                    if 0 <= c-1 < num_cols:
-                        if board[r+1][c-1] == '.':
-                            neighbor_bombs += 1
-                if 0 <= r-1 < num_rows:
-                    if 0 <= c < num_cols:
-                        if board[r-1][c] == '.':
-                            neighbor_bombs += 1
-                if 0 <= r < num_rows:
-                    if 0 <= c < num_cols:
-                        if board[r][c] == '.':
-                            neighbor_bombs += 1
-                if 0 <= r+1 < num_rows:
-                    if 0 <= c < num_cols:
-                        if board[r+1][c] == '.':
-                            neighbor_bombs += 1
-                if 0 <= r-1 < num_rows:
-                    if 0 <= c+1 < num_cols:
-                        if board[r-1][c+1] == '.':
-                            neighbor_bombs += 1
-                if 0 <= r < num_rows:
-                    if 0 <= c+1 < num_cols:
-                        if board[r][c+1] == '.':
-                            neighbor_bombs += 1
-                if 0 <= r+1 < num_rows:
-                    if 0 <= c+1 < num_cols:
-                        if board[r+1][c+1] == '.':
-                            neighbor_bombs += 1
-                board[r][c] = neighbor_bombs
     return {
-        'dimensions': (num_rows, num_cols),
+        'dimensions': dimensions,
         'board' : board,
         'mask' : mask,
         'state': 'ongoing'}
@@ -532,4 +527,4 @@ if __name__ == "__main__":
     # verbose flag can be set to True to see all test results, including those
     # that pass.
     #
-    doctest.run_docstring_examples(new_nd_diffs, globals(), optionflags=_doctest_flags, verbose=False)
+    doctest.run_docstring_examples(new_game_2d, globals(), optionflags=_doctest_flags, verbose=False)
