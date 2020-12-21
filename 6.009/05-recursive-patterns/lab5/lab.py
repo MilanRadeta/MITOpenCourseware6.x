@@ -103,6 +103,38 @@ def get_surrounding_indexes(index):
         if neighbour != index:
             yield neighbour
 
+
+def get_indexes(dimensions):
+    """
+    Get all possible indexes for given dimensions.
+
+    Parameters:
+        dimensions (tuple): Tuple of ints, representing each dimension size
+
+    Returns:
+        Returns a generator of n-tuples
+
+    >>> tuple(get_indexes((3,)))
+    ((0,), (1,), (2,))
+    >>> tuple(get_indexes((3,2)))
+    ((0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1))
+
+    """
+
+    if len(dimensions) == 0:
+        yield tuple()
+        return
+
+    dim = dimensions[0]
+    if len(dimensions) == 0:
+        for i in range(dim):
+            yield (i,)
+        return
+
+    for i in range(dim):
+        for j in get_indexes(dimensions[1:]):
+            yield (i,) + j
+
 def get_innermost_list(board, index):
     """
     Given the n-dimensional board and n-tuple index,
@@ -313,17 +345,7 @@ def render_2d(game, xray=False):
     ...                   [False, False, False, True]]}, True)
     [['.', '3', '1', ' '], ['.', '.', '1', ' ']]
     """
-    rows, cols = game['dimensions']
-    board = game['board']
-    mask = game['mask']
-    result = []
-    for i in range(rows):
-        result.append([])
-        for j in range(cols):
-            cell = board[i][j]
-            val = (' ' if cell == 0 else str(cell)) if xray or mask[i][j] else '_'
-            result[-1].append(val)
-    return result
+    return render_nd(game, xray)
 
 
 def render_ascii(game, xray=False):
@@ -489,6 +511,23 @@ def dig_nd(game, coordinates):
 
     board = game['board']
     mask = game['mask']
+    
+    
+    if 'revealed' not in game:
+        total = 1
+        for dim in game['dimensions']:
+            total *= dim
+        game.setdefault('revealed', 0)
+        game.setdefault('bombs', 0)
+        game.setdefault('covered', total)
+        game.setdefault('total', total)
+
+        for index in get_indexes(game['dimensions']):
+            val = get_value(mask, index)
+            game['revealed'] += 1 if val else 0
+            game['covered'] -= 1 if val else 0
+            val = get_value(board, index)
+            game['bombs'] += 1 if val == '.' else 0
 
     if get_value(mask, coordinates):
         return 0
@@ -558,7 +597,7 @@ def render_nd(game, xray=False):
 
     board = game['board']
     mask = game['mask']
-    print(list(helper(board, mask)))
+    return list(helper(board, mask))
 
 
 
