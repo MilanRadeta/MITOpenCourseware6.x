@@ -218,10 +218,6 @@ def new_game_2d(num_rows, num_cols, bombs):
     'state' - string, one of following values ('ongoing', 'victory', 'defeat')
     'board' - 2-dimensional array, with cell values of 0-8 (number of neighbour bombs) or '.' (bomb)
     'mask' - 2-dimensional array with boolean cell values, indicating which cells are revealed
-    'bombs' - number of bombs
-    'covered' -  number of covered cells
-    'revealed' - number of revealed cells
-    'total' - total number of cells
     
     Parameters:
        num_rows (int): Number of rows
@@ -236,15 +232,11 @@ def new_game_2d(num_rows, num_cols, bombs):
     board:
         ['.', 3, 1, 0]
         ['.', '.', 1, 0]
-    bombs: 3
-    covered: 8
     dimensions: (2, 4)
     mask:
         [False, False, False, False]
         [False, False, False, False]
-    revealed: 0
     state: ongoing
-    total: 8
     """
     return new_game_nd((num_rows, num_cols), bombs)
 
@@ -271,43 +263,31 @@ def dig_2d(game, row, col):
 
     >>> game = new_game_2d(2, 4, [(0, 0), (1, 0), (1, 1)])
     >>> game['mask'][0][1] = True
-    >>> game['revealed'] += 1
-    >>> game['covered'] -= 1
     >>> dig_2d(game, 0, 3)
     4
     >>> dump(game)
     board:
         ['.', 3, 1, 0]
         ['.', '.', 1, 0]
-    bombs: 3
-    covered: 3
     dimensions: (2, 4)
     mask:
         [False, True, True, True]
         [False, False, True, True]
-    revealed: 5
     state: victory
-    total: 8
 
     >>> game = new_game_2d(2, 4, [(0, 0), (1, 0), (1, 1)])
     >>> game['mask'][0][1] = True
-    >>> game['revealed'] += 1
-    >>> game['covered'] -= 1
     >>> dig_2d(game, 0, 0)
     1
     >>> dump(game)
     board:
         ['.', 3, 1, 0]
         ['.', '.', 1, 0]
-    bombs: 3
-    covered: 6
     dimensions: (2, 4)
     mask:
         [True, True, False, False]
         [False, False, False, False]
-    revealed: 2
     state: defeat
-    total: 8
     """
     return dig_nd(game, (row, col))
 
@@ -390,10 +370,6 @@ def new_game_nd(dimensions, bombs):
     'state' - string, one of following values ('ongoing', 'victory', 'defeat')
     'board' - 2-dimensional array, with cell values of 0-8 (number of neighbour bombs) or '.' (bomb)
     'mask' - 2-dimensional array with boolean cell values, indicating which cells are revealed
-    'bombs' - number of bombs
-    'covered' -  number of covered cells
-    'revealed' - number of revealed cells
-    'total' - total number of cells
     
     Parameters:
        dimensions (tuple): Dimensions of the board
@@ -408,15 +384,11 @@ def new_game_nd(dimensions, bombs):
     board:
         [[3, '.'], [3, 3], [1, 1], [0, 0]]
         [['.', 3], [3, '.'], [1, 1], [0, 0]]
-    bombs: 3
-    covered: 16
     dimensions: (2, 4, 2)
     mask:
         [[False, False], [False, False], [False, False], [False, False]]
         [[False, False], [False, False], [False, False], [False, False]]
-    revealed: 0
     state: ongoing
-    total: 16
     """
     board = new_nd_list(dimensions, 0)
     mask = new_nd_list(dimensions, False)
@@ -432,19 +404,11 @@ def new_game_nd(dimensions, bombs):
         for index in get_surrounding_indexes(bomb):
             set_value(board, index, setter)
 
-    total = 1
-    for dim in dimensions:
-        total *= dim
-
     return {
         'dimensions': dimensions,
         'board' : board,
         'mask' : mask,
         'state': 'ongoing',
-        'revealed': 0,
-        'bombs': len(bombs),
-        'covered': total,
-        'total': total
     }
 
 
@@ -469,42 +433,30 @@ def dig_nd(game, coordinates):
 
     >>> g = new_game_nd((2, 4, 2), [(0, 0, 1), (1, 0, 0), (1, 1, 1)])
     >>> g['mask'][0][1][1] = True
-    >>> g['revealed'] += 1
-    >>> g['covered'] -= 1
     >>> dig_nd(g, (0, 3, 0))
     8
     >>> dump(g)
     board:
         [[3, '.'], [3, 3], [1, 1], [0, 0]]
         [['.', 3], [3, '.'], [1, 1], [0, 0]]
-    bombs: 3
-    covered: 7
     dimensions: (2, 4, 2)
     mask:
         [[False, False], [False, True], [True, True], [True, True]]
         [[False, False], [False, False], [True, True], [True, True]]
-    revealed: 9
     state: ongoing
-    total: 16
     >>> g = new_game_nd((2, 4, 2), [(0, 0, 1), (1, 0, 0), (1, 1, 1)])
     >>> g['mask'][0][1][1] = True
-    >>> g['revealed'] += 1
-    >>> g['covered'] -= 1
     >>> dig_nd(g, (0, 0, 1))
     1
     >>> dump(g)
     board:
         [[3, '.'], [3, 3], [1, 1], [0, 0]]
         [['.', 3], [3, '.'], [1, 1], [0, 0]]
-    bombs: 3
-    covered: 14
     dimensions: (2, 4, 2)
     mask:
         [[False, True], [False, True], [False, False], [False, False]]
         [[False, False], [False, False], [False, False], [False, False]]
-    revealed: 2
     state: defeat
-    total: 16
     """
     if game['state'] in ('defeat', 'victory'):
         return 0
@@ -513,35 +465,31 @@ def dig_nd(game, coordinates):
     mask = game['mask']
     
     
-    if 'revealed' not in game:
-        total = 1
-        for dim in game['dimensions']:
-            total *= dim
-        game.setdefault('revealed', 0)
-        game.setdefault('bombs', 0)
-        game.setdefault('covered', total)
-        game.setdefault('total', total)
+    covered = 0
+    revealed = 0
+    bombs = 0
+    covered = 1
+    for dim in game['dimensions']:
+        covered *= dim
 
-        for index in get_indexes(game['dimensions']):
-            val = get_value(mask, index)
-            game['revealed'] += 1 if val else 0
-            game['covered'] -= 1 if val else 0
-            val = get_value(board, index)
-            game['bombs'] += 1 if val == '.' else 0
+    for index in get_indexes(game['dimensions']):
+        val = get_value(mask, index)
+        covered -= 1 if val else 0
+        val = get_value(board, index)
+        bombs += 1 if val == '.' else 0
 
     if get_value(mask, coordinates):
         return 0
     set_value(mask, coordinates, True)
 
-    old_revealed = game['revealed']
-    game['revealed'] += 1
-    game['covered'] -= 1
+    revealed += 1
+    covered -= 1
     val = get_value(board, coordinates)
     if val == '.':
         game['state'] = 'defeat'
         return 1
     
-    if game['covered'] == game['bombs']:
+    if covered == bombs:
         game['state'] = 'victory'
         return 1
 
@@ -549,9 +497,9 @@ def dig_nd(game, coordinates):
         for nindex in get_surrounding_indexes(coordinates):
             shown = get_value(mask, nindex)
             if shown is not None and not shown and get_value(board, nindex) != '.':
-                dig_nd(game, nindex)
+                revealed += dig_nd(game, nindex)
 
-    return game['revealed'] - old_revealed
+    return revealed
 
 
 def render_nd(game, xray=False):
