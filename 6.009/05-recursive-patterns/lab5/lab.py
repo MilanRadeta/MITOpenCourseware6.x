@@ -46,28 +46,28 @@ def new_nd_diffs(n):
     Returns:
         Returns a tuple of 3**n tuples of n diff values ranging from -1 to 1.
 
-    >>> new_nd_diffs(1)
+    >>> tuple(new_nd_diffs(1))
     ((-1,), (0,), (1,))
 
-    >>> new_nd_diffs(2)
+    >>> tuple(new_nd_diffs(2))
     ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
 
-    >>> new_nd_diffs(3)
+    >>> tuple(new_nd_diffs(3))
     ((-1, -1, -1), (-1, -1, 0), (-1, -1, 1), (-1, 0, -1), (-1, 0, 0), (-1, 0, 1), (-1, 1, -1), (-1, 1, 0), (-1, 1, 1), (0, -1, -1), (0, -1, 0), (0, -1, 1), (0, 0, -1), (0, 0, 0), (0, 0, 1), (0, 1, -1), (0, 1, 0), (0, 1, 1), (1, -1, -1), (1, -1, 0), (1, -1, 1), (1, 0, -1), (1, 0, 0), (1, 0, 1), (1, 1, -1), (1, 1, 0), (1, 1, 1))
     """
 
     if n == 0:
-        return []
-    base_diffs = tuple((i,) for i in range(-1, 2))
+        yield None
+        return
+
     if n == 1:
-        return base_diffs
+        for i in range(-1, 2):
+            yield (i,)
+        return
     
-    diffs = []
-    subdiffs = new_nd_diffs(n-1)
-    for diff in base_diffs:
-        for subdiff in subdiffs:
-            diffs.append(diff + subdiff)
-    return tuple(diffs)
+    for diff in new_nd_diffs(1):
+        for subdiff in new_nd_diffs(n-1):
+            yield diff + subdiff
 
 def get_surrounding_indexes(index):
     """
@@ -80,7 +80,7 @@ def get_surrounding_indexes(index):
         index (tuple): n-tuple of ints
 
     Returns:
-        Returns a tuple of 3**n tuples of indexes surrounding the provided index and the provided index itself.
+        Returns a generator of 3**n tuples of indexes surrounding the provided index and the provided index itself.
 
     >>> tuple(get_surrounding_indexes((0,)))
     ((-1,), (1,))
@@ -546,7 +546,20 @@ def render_nd(game, xray=False):
     [[['3', '.'], ['3', '3'], ['1', '1'], [' ', ' ']],
      [['.', '3'], ['3', '.'], ['1', '1'], [' ', ' ']]]
     """
-    raise NotImplementedError
+    def helper(board, mask):
+        for i in range(len(board)):
+            cell = board[i]
+            if isinstance(cell, list):
+                yield list(helper(cell, mask[i]))
+            else:
+                val = (' ' if cell == 0 else str(cell)) if xray or mask[i] else '_'
+                yield val
+            
+
+    board = game['board']
+    mask = game['mask']
+    print(list(helper(board, mask)))
+
 
 
 if __name__ == "__main__":
