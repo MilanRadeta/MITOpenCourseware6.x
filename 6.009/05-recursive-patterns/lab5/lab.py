@@ -463,36 +463,29 @@ def dig_nd(game, coordinates):
 
     board = game['board']
     mask = game['mask']
-    
-    
-    covered = 0
-    revealed = 0
-    bombs = 0
-    covered = 1
-    for dim in game['dimensions']:
-        covered *= dim
-
-    for index in get_indexes(game['dimensions']):
-        val = get_value(mask, index)
-        covered -= 1 if val else 0
-        val = get_value(board, index)
-        bombs += 1 if val == '.' else 0
 
     if get_value(mask, coordinates):
         return 0
     set_value(mask, coordinates, True)
 
-    revealed += 1
-    covered -= 1
     val = get_value(board, coordinates)
     if val == '.':
         game['state'] = 'defeat'
         return 1
     
+    # TODO optimize, with helper?
+    covered = 0
+    bombs = 0
+
+    for index in get_indexes(game['dimensions']):
+        covered += 0 if get_value(mask, index) else 1
+        bombs += 1 if get_value(board, index) == '.' else 0
+        
     if covered == bombs:
         game['state'] = 'victory'
         return 1
 
+    revealed = 1
     if val == 0:
         for nindex in get_surrounding_indexes(coordinates):
             shown = get_value(mask, nindex)
