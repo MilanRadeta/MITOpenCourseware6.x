@@ -194,7 +194,7 @@ def new_game_2d(num_rows, num_cols, bombs):
                      tuples
 
     Returns:
-       A game state dictionary
+       A game object dictionary
 
     >>> dump(new_game_2d(2, 4, [(0, 0), (1, 0), (1, 1)]))
     board:
@@ -210,35 +210,7 @@ def new_game_2d(num_rows, num_cols, bombs):
     state: ongoing
     total: 8
     """
-    dimensions = (num_rows, num_cols)
-    board = new_nd_list(dimensions, 0)
-    mask = new_nd_list(dimensions, False)
-
-    def setter(val):
-        if val is not None and val != '.':
-            return val + 1
-        return val
-        
-
-    for bomb in bombs:
-        set_value(board, bomb, '.')
-        for index in get_surrounding_indexes(bomb):
-            set_value(board, index, setter)
-
-    total = 1
-    for dim in dimensions:
-        total *= dim
-
-    return {
-        'dimensions': dimensions,
-        'board' : board,
-        'mask' : mask,
-        'state': 'ongoing',
-        'revealed': 0,
-        'bombs': len(bombs),
-        'covered': total,
-        'total': total
-    }
+    return new_game_nd((num_rows, num_cols), bombs)
 
 
 def dig_2d(game, row, col):
@@ -415,30 +387,67 @@ def new_game_nd(dimensions, bombs):
     """
     Start a new game.
 
-    Return a game state dictionary, with the 'dimensions', 'state', 'board' and
-    'mask' fields adequately initialized.
-
-
-    Args:
+    Return a game model dictionary with following properties:
+    'dimensions' - sames as input dimensions
+    'state' - string, one of following values ('ongoing', 'victory', 'defeat')
+    'board' - 2-dimensional array, with cell values of 0-8 (number of neighbour bombs) or '.' (bomb)
+    'mask' - 2-dimensional array with boolean cell values, indicating which cells are revealed
+    'bombs' - number of bombs
+    'covered' -  number of covered cells
+    'revealed' - number of revealed cells
+    'total' - total number of cells
+    
+    Parameters:
        dimensions (tuple): Dimensions of the board
        bombs (list): Bomb locations as a list of lists, each an
                      N-dimensional coordinate
 
     Returns:
-       A game state dictionary
+       A game object dictionary
 
     >>> g = new_game_nd((2, 4, 2), [(0, 0, 1), (1, 0, 0), (1, 1, 1)])
     >>> dump(g)
     board:
         [[3, '.'], [3, 3], [1, 1], [0, 0]]
         [['.', 3], [3, '.'], [1, 1], [0, 0]]
+    bombs: 3
+    covered: 16
     dimensions: (2, 4, 2)
     mask:
         [[False, False], [False, False], [False, False], [False, False]]
         [[False, False], [False, False], [False, False], [False, False]]
+    revealed: 0
     state: ongoing
+    total: 16
     """
-    raise NotImplementedError
+    board = new_nd_list(dimensions, 0)
+    mask = new_nd_list(dimensions, False)
+
+    def setter(val):
+        if val is not None and val != '.':
+            return val + 1
+        return val
+        
+
+    for bomb in bombs:
+        set_value(board, bomb, '.')
+        for index in get_surrounding_indexes(bomb):
+            set_value(board, index, setter)
+
+    total = 1
+    for dim in dimensions:
+        total *= dim
+
+    return {
+        'dimensions': dimensions,
+        'board' : board,
+        'mask' : mask,
+        'state': 'ongoing',
+        'revealed': 0,
+        'bombs': len(bombs),
+        'covered': total,
+        'total': total
+    }
 
 
 def dig_nd(game, coordinates):
@@ -537,7 +546,7 @@ if __name__ == "__main__":
     # Test with doctests. Helpful to debug individual lab.py functions.
     import doctest
     _doctest_flags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
-    doctest.testmod(optionflags=_doctest_flags) #runs ALL doctests
+    # doctest.testmod(optionflags=_doctest_flags) #runs ALL doctests
 
     # Alternatively, can run the doctests JUST for specified function/methods,
     # e.g., for render_2d or any other function you might want.  To do so, comment
@@ -546,4 +555,4 @@ if __name__ == "__main__":
     # verbose flag can be set to True to see all test results, including those
     # that pass.
     #
-    # doctest.run_docstring_examples(dig_2d, globals(), optionflags=_doctest_flags, verbose=False)
+    doctest.run_docstring_examples(new_game_nd, globals(), optionflags=_doctest_flags, verbose=False)
