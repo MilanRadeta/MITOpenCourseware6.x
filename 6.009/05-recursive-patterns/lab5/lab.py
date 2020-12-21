@@ -82,28 +82,26 @@ def get_surrounding_indexes(index):
     Returns:
         Returns a tuple of 3**n tuples of indexes surrounding the provided index and the provided index itself.
 
-    >>> get_surrounding_indexes((0,))
+    >>> tuple(get_surrounding_indexes((0,)))
     ((-1,), (1,))
 
-    >>> get_surrounding_indexes((3,))
+    >>> tuple(get_surrounding_indexes((3,)))
     ((2,), (4,))
 
-    >>> get_surrounding_indexes((0,0))
+    >>> tuple(get_surrounding_indexes((0,0)))
     ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
 
-    >>> get_surrounding_indexes((2,2))
+    >>> tuple(get_surrounding_indexes((2,2)))
     ((1, 1), (1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2), (3, 3))
 
-    >>> get_surrounding_indexes((1, 4, 8))
+    >>> tuple(get_surrounding_indexes((1, 4, 8)))
     ((0, 3, 7), (0, 3, 8), (0, 3, 9), (0, 4, 7), (0, 4, 8), (0, 4, 9), (0, 5, 7), (0, 5, 8), (0, 5, 9), (1, 3, 7), (1, 3, 8), (1, 3, 9), (1, 4, 7), (1, 4, 9), (1, 5, 7), (1, 5, 8), (1, 5, 9), (2, 3, 7), (2, 3, 8), (2, 3, 9), (2, 4, 7), (2, 4, 8), (2, 4, 9), (2, 5, 7), (2, 5, 8), (2, 5, 9))
     """
-    diffs = new_nd_diffs(len(index))
-    result = []
-    for pair in zip((index,) * len(diffs), diffs):
-        neighbour = tuple(map(sum, zip(*pair)))
+    for diff in new_nd_diffs(len(index)):
+        pair = zip(index, diff)
+        neighbour = tuple(map(sum, pair))
         if neighbour != index:
-            result.append(neighbour)
-    return tuple(result)
+            yield neighbour
 
 def get_innermost_list(board, index):
     """
@@ -564,4 +562,4 @@ if __name__ == "__main__":
     # verbose flag can be set to True to see all test results, including those
     # that pass.
     #
-    # doctest.run_docstring_examples(dig_nd, globals(), optionflags=_doctest_flags, verbose=False)
+    # doctest.run_docstring_examples(get_surrounding_indexes, globals(), optionflags=_doctest_flags, verbose=False)
