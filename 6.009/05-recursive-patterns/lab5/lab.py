@@ -68,7 +68,7 @@ def new_nd_diffs(n):
 
 def get_surrounding_indexes(index):
     """
-    Get tuple of indexes surrounding provided index and the provided index itself
+    Get tuple of indexes surrounding provided index
     by adding values of index with values of diffs provided by new_nd_diffs.
 
     Each index is also an n-tuple of ints.
@@ -94,7 +94,9 @@ def get_surrounding_indexes(index):
     diffs = new_nd_diffs(len(index))
     result = []
     for pair in zip((index,) * len(diffs), diffs):
-        result.append(tuple(map(sum, zip(*pair))))
+        neighbour = tuple(map(sum, zip(*pair)))
+        if neighbour != index:
+            result.append()
     return tuple(result)
 
 def get_innermost_list(board, index):
@@ -215,7 +217,6 @@ def new_game_2d(num_rows, num_cols, bombs):
     for bomb in bombs:
         set_value(board, bomb, '.')
         for index in get_surrounding_indexes(bomb):
-            index = tuple(map(sum, zip(*pair)))
             set_value(board, index, setter)
 
     total = 1
