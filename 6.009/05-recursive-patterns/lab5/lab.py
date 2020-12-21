@@ -80,23 +80,23 @@ def get_surrounding_indexes(index):
         Returns a tuple of 3**n tuples of indexes surrounding the provided index and the provided index itself.
 
     >>> get_surrounding_indexes((0,))
-    ((-1,), (0,), (1,))
+    ((-1,), (1,))
 
     >>> get_surrounding_indexes((3,))
-    ((2,), (3,), (4,))
+    ((2,), (4,))
 
     >>> get_surrounding_indexes((0,0))
-    ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1))
+    ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
 
     >>> get_surrounding_indexes((2,2))
-    ((1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3))
+    ((1, 1), (1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2), (3, 3))
     """
     diffs = new_nd_diffs(len(index))
     result = []
     for pair in zip((index,) * len(diffs), diffs):
         neighbour = tuple(map(sum, zip(*pair)))
         if neighbour != index:
-            result.append()
+            result.append(neighbour)
     return tuple(result)
 
 def get_innermost_list(board, index):
@@ -131,7 +131,6 @@ def get_innermost_list(board, index):
         return None, None
     return inner, i
 
-
 def set_value(board, index, val):
     """
     Set the value at a specified n-tuple index in n-dimensional list.
@@ -149,7 +148,6 @@ def set_value(board, index, val):
     cell, i = get_innermost_list(board, index)
     if cell is not None:
         cell[i] = val(cell[i]) if callable(val) else val
-
 
 def get_value(board, index):
     """
@@ -173,18 +171,22 @@ def get_value(board, index):
     cell, i = get_innermost_list(board, index)
     return None if cell is None else cell[i]
 
-
-
 # 2-D IMPLEMENTATION
-
 
 def new_game_2d(num_rows, num_cols, bombs):
     """
     Start a new game.
 
-    Return a game state dictionary, with the 'dimensions', 'state', 'board' and
-    'mask' fields adequately initialized.
-
+    Return a game model dictionary with following properties:
+    'dimensions' - tuple with value of (num_rows, num_cols)
+    'state' - string, one of following values ('ongoing', 'victory', 'defeat')
+    'board' - 2-dimensional array, with cell values of 0-8 (number of neighbour bombs) or '.' (bomb)
+    'mask' - 2-dimensional array with boolean cell values, indicating which cells are revealed
+    'bombs' - number of bombs
+    'covered' -  number of covered cells
+    'revealed' - number of revealed cells
+    'total' - total number of cells
+    
     Parameters:
        num_rows (int): Number of rows
        num_cols (int): Number of columns
@@ -198,11 +200,15 @@ def new_game_2d(num_rows, num_cols, bombs):
     board:
         ['.', 3, 1, 0]
         ['.', '.', 1, 0]
+    bombs: 3
+    covered: 8
     dimensions: (2, 4)
     mask:
         [False, False, False, False]
         [False, False, False, False]
+    revealed: 0
     state: ongoing
+    total: 8
     """
     dimensions = (num_rows, num_cols)
     board = new_nd_list(dimensions, 0)
@@ -229,6 +235,7 @@ def new_game_2d(num_rows, num_cols, bombs):
         'mask' : mask,
         'state': 'ongoing',
         'revealed': 0,
+        'bombs': len(bombs),
         'covered': total,
         'total': total
     }
@@ -236,63 +243,63 @@ def new_game_2d(num_rows, num_cols, bombs):
 
 def dig_2d(game, row, col):
     """
-    Reveal the cell at (row, col), and, in some cases, recursively reveal its
-    neighboring squares.
+    Reveal the cell at (row, col) and set game['mask'][row][col] to True.
+    
+    If the revealed cell has the bomb, change game state to 'defeat'.
 
-    Update game['mask'] to reveal (row, col).  Then, if (row, col) has no
-    adjacent bombs (including diagonally), then recursively reveal (dig up) its
-    eight neighbors.  Return an integer indicating how many new squares were
-    revealed in total, including neighbors, and neighbors of neighbors, and so
-    on.
+    If the cell has no adjacent bombs, recursively reveal its direct neighbours.
+    
+    If all the cells except the bomb cells are revealed, change game state to 'victory'.
 
-    The state of the game should be changed to 'defeat' when at least one bomb
-    is visible on the board after digging (i.e. game['mask'][bomb_location] ==
-    True), 'victory' when all safe squares (squares that do not contain a bomb)
-    and no bombs are visible, and 'ongoing' otherwise.
+    Return number of revealed cells in total.
 
     Parameters:
-       game (dict): Game state
+       game (dict): Game object
        row (int): Where to start digging (row)
        col (int): Where to start digging (col)
 
     Returns:
        int: the number of new squares revealed
 
-    >>> game = {'dimensions': (2, 4),
-    ...         'board': [['.', 3, 1, 0],
-    ...                   ['.', '.', 1, 0]],
-    ...         'mask': [[False, True, False, False],
-    ...                  [False, False, False, False]],
-    ...         'state': 'ongoing'}
+    >>> game = new_game_2d(2, 4, [(0, 0), (1, 0), (1, 1)])
+    >>> game['mask'][0][1] = True
+    >>> game['revealed'] += 1
+    >>> game['covered'] -= 1
     >>> dig_2d(game, 0, 3)
     4
     >>> dump(game)
     board:
         ['.', 3, 1, 0]
         ['.', '.', 1, 0]
+    bombs: 3
+    covered: 3
     dimensions: (2, 4)
     mask:
         [False, True, True, True]
         [False, False, True, True]
+    revealed: 5
     state: victory
+    total: 8
 
-    >>> game = {'dimensions': [2, 4],
-    ...         'board': [['.', 3, 1, 0],
-    ...                   ['.', '.', 1, 0]],
-    ...         'mask': [[False, True, False, False],
-    ...                  [False, False, False, False]],
-    ...         'state': 'ongoing'}
+    >>> game = new_game_2d(2, 4, [(0, 0), (1, 0), (1, 1)])
+    >>> game['mask'][0][1] = True
+    >>> game['revealed'] += 1
+    >>> game['covered'] -= 1
     >>> dig_2d(game, 0, 0)
     1
     >>> dump(game)
     board:
         ['.', 3, 1, 0]
         ['.', '.', 1, 0]
-    dimensions: [2, 4]
+    bombs: 3
+    covered: 6
+    dimensions: (2, 4)
     mask:
         [True, True, False, False]
         [False, False, False, False]
+    revealed: 2
     state: defeat
+    total: 8
     """
     if game['state'] in ('defeat', 'victory'):
         return 0
@@ -301,10 +308,11 @@ def dig_2d(game, row, col):
     board = game['board']
     mask = game['mask']
 
-    if not get_value(mask, index):
+    if get_value(mask, index):
         return 0
     set_value(mask, index, True)
 
+    old_revealed = game['revealed']
     game['revealed'] += 1
     game['covered'] -= 1
 
@@ -312,79 +320,16 @@ def dig_2d(game, row, col):
         game['state'] = 'defeat'
         return 1
     
-    if game['covered'] == 0:
+    if game['covered'] == game['bombs']:
         game['state'] = 'victory'
         return 1
 
+    for nindex in get_surrounding_indexes(index):
+        shown = get_value(mask, nindex)
+        if shown is not None and not shown and get_value(board, nindex) != '.':
+            dig_2d(game, nindex[0], nindex[1])
 
-    if game['board'][row][col] == 0:
-        num_rows, num_cols = game['dimensions']
-        if 0 <= row-1 < num_rows:
-            if 0 <= col-1 < num_cols:
-                if game['board'][row-1][col-1] != '.':
-                    if game['mask'][row-1][col-1] == False:
-                        revealed += dig_2d(game, row-1, col-1)
-        if 0 <= row < num_rows:
-            if 0 <= col-1 < num_cols:
-                if game['board'][row][col-1] != '.':
-                    if game['mask'][row][col-1] == False:
-                        revealed += dig_2d(game, row, col-1)
-        if 0 <= row+1 < num_rows:
-            if 0 <= col-1 < num_cols:
-                if game['board'][row+1][col-1] != '.':
-                    if game['mask'][row+1][col-1] == False:
-                        revealed += dig_2d(game, row+1, col-1)
-        if 0 <= row-1 < num_rows:
-            if 0 <= col < num_cols:
-                if game['board'][row-1][col] != '.':
-                    if game['mask'][row-1][col] == False:
-                        revealed += dig_2d(game, row-1, col)
-        if 0 <= row < num_rows:
-            if 0 <= col < num_cols:
-                if game['board'][row][col] != '.':
-                    if game['mask'][row][col] == False:
-                        revealed += dig_2d(game, row, col)
-        if 0 <= row+1 < num_rows:
-            if 0 <= col < num_cols:
-                if game['board'][row+1][col] != '.':
-                    if game['mask'][row+1][col] == False:
-                        revealed += dig_2d(game, row+1, col)
-        if 0 <= row-1 < num_rows:
-            if 0 <= col+1 < num_cols:
-                if game['board'][row-1][col+1] != '.':
-                    if game['mask'][row-1][col+1] == False:
-                        revealed += dig_2d(game, row-1, col+1)
-        if 0 <= row < num_rows:
-            if 0 <= col+1 < num_cols:
-                if game['board'][row][col+1] != '.':
-                    if game['mask'][row][col+1] == False:
-                        revealed += dig_2d(game, row, col+1)
-        if 0 <= row+1 < num_rows:
-            if 0 <= col+1 < num_cols:
-                if game['board'][row+1][col+1] != '.':
-                    if game['mask'][row+1][col+1] == False:
-                        revealed += dig_2d(game, row+1, col+1)
-
-    bombs = 0  # set number of bombs to 0
-    covered_squares = 0
-    for r in range(game['dimensions'][0]):
-        # for each r,
-        for c in range(game['dimensions'][1]):
-            # for each c,
-            if game['board'][r][c] == '.':
-                if  game['mask'][r][c] == True:
-                    # if the game mask is True, and the board is '.', add 1 to
-                    # bombs
-                    bombs += 1
-            elif game['mask'][r][c] == False:
-                covered_squares += 1
-    bad_squares = bombs + covered_squares
-    if bad_squares > 0:
-        game['state'] = 'ongoing'
-        return revealed
-    else:
-        game['state'] = 'victory'
-        return revealed
+    return game['revealed'] - old_revealed
 
 
 def render_2d(game, xray=False):
@@ -592,7 +537,7 @@ if __name__ == "__main__":
     # Test with doctests. Helpful to debug individual lab.py functions.
     import doctest
     _doctest_flags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
-    # doctest.testmod(optionflags=_doctest_flags) #runs ALL doctests
+    doctest.testmod(optionflags=_doctest_flags) #runs ALL doctests
 
     # Alternatively, can run the doctests JUST for specified function/methods,
     # e.g., for render_2d or any other function you might want.  To do so, comment
@@ -601,4 +546,4 @@ if __name__ == "__main__":
     # verbose flag can be set to True to see all test results, including those
     # that pass.
     #
-    doctest.run_docstring_examples(get_surrounding_indexes, globals(), optionflags=_doctest_flags, verbose=False)
+    # doctest.run_docstring_examples(dig_2d, globals(), optionflags=_doctest_flags, verbose=False)
