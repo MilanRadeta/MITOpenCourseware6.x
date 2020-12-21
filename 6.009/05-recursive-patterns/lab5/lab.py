@@ -99,6 +99,49 @@ def get_innermost_list(board, index):
     return inner, i
 
 
+def set_value(board, index, val):
+    """
+    Set the value at a specified n-tuple index in n-dimensional list.
+
+    Dimension of the list and size of index must be equal.
+
+    Parameters:
+        board (list): n-dimensional list
+        index (tuple): tuple with n values
+        val (any): value to set or a setter function which receives current value as parameter and returns new value
+
+    Returns:
+        None
+    """
+    cell, i = get_innermost_list(board, index)
+    if cell is not None:
+        cell[i] = val(cell[i]) if callable(val) else val
+
+
+def get_value(board, index):
+    """
+    Get the value at a specified n-tuple index in n-dimensional list.
+
+    Dimension of the list and size of index must be equal.
+
+    Parameters:
+        board (list): n-dimensional list
+        index (tuple): tuple with n values
+
+    Returns:
+        value (any): value at a given index
+    >>> get_value([[1, 2], [3, 4]], (1, 0))
+    3
+    >>> get_value([[1, 2], [3, 4]], (-1, 2)) is None
+    True
+    >>> get_value([[1, 2], [3, 4]], (-1, -1)) is None
+    True
+    """
+    cell, i = get_innermost_list(board, index)
+    return None if cell is None else cell[i]
+
+
+
 # 2-D IMPLEMENTATION
 
 
@@ -134,14 +177,17 @@ def new_game_2d(num_rows, num_cols, bombs):
     diffs = new_nd_diffs(len(dimensions))
     len_diffs = len(diffs)
 
+    def setter(val):
+        if val is not None and val != '.':
+            return val + 1
+        return val
+        
+
     for bomb in bombs:
-        inner, i = get_innermost_list(board, bomb)
-        inner[i] = '.'
+        set_value(board, bomb, '.')
         for pair in zip((bomb,) * len_diffs, diffs):
             index = tuple(map(sum, zip(*pair)))
-            inner, i = get_innermost_list(board, index)
-            if inner is not None and inner[i] != '.':
-                inner[i] += 1
+            set_value(board, index, setter)
 
     return {
         'dimensions': dimensions,
@@ -210,12 +256,15 @@ def dig_2d(game, row, col):
         [False, False, False, False]
     state: defeat
     """
-    if game['state'] == 'defeat' or game['state'] == 'victory':
-        game['state'] = game['state']  # keep the state the same
+    if game['state'] in ('defeat', 'victory'):
         return 0
 
-    if game['board'][row][col] == '.':
-        game['mask'][row][col] = True
+    index = (row, col)
+    board = game['board']
+    mask = game['mask']
+
+    if get_value(board, index) == '.':
+        set_value(mask, index, True)
         game['state'] = 'defeat'
         return 1
 
