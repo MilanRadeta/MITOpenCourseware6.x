@@ -218,9 +218,9 @@ def new_game_2d(num_rows, num_cols, bombs):
             index = tuple(map(sum, zip(*pair)))
             set_value(board, index, setter)
 
-    covered = 1
+    total = 1
     for dim in dimensions:
-        covered *= dim
+        total *= dim
 
     return {
         'dimensions': dimensions,
@@ -228,7 +228,8 @@ def new_game_2d(num_rows, num_cols, bombs):
         'mask' : mask,
         'state': 'ongoing',
         'revealed': 0,
-        'covered': covered
+        'covered': total,
+        'total': total
     }
 
 
