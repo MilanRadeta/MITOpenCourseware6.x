@@ -412,7 +412,7 @@ def new_game_nd(dimensions, bombs):
     }
 
 
-def dig_nd(game, coordinates):
+def dig_nd(game, coordinates, cache={}):
     """
     Reveal the cell at coordinates and set game['mask'] at coordinates to True.
     
@@ -473,13 +473,21 @@ def dig_nd(game, coordinates):
         game['state'] = 'defeat'
         return 1
     
-    # TODO optimize, with helper?
-    covered = 0
-    bombs = 0
+    if 'board' not in cache or cache['board'] != board:
+        covered = 0
+        bombs = 0
+        for index in get_indexes(game['dimensions']):
+            covered += 0 if get_value(mask, index) else 1
+            bombs += 1 if get_value(board, index) == '.' else 0
+        cache['covered'] = covered
+        cache['bombs'] = bombs
+        cache['board'] = board
+    else:
+        cache['covered'] -= 1
 
-    for index in get_indexes(game['dimensions']):
-        covered += 0 if get_value(mask, index) else 1
-        bombs += 1 if get_value(board, index) == '.' else 0
+            
+    covered = cache['covered']
+    bombs = cache['bombs']
         
     if covered == bombs:
         game['state'] = 'victory'
