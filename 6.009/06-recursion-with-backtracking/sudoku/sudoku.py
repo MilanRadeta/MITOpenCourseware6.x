@@ -1,3 +1,6 @@
+import time
+from inputs import all_inputs
+
 def format_sudoku(board):
     """
     Format a sudoku board to be printed to the screen
@@ -39,13 +42,50 @@ def values_in_subgrid(board, sr, sc):
             for r in range(sr*3, (sr+1)*3)
             for c in range(sc*3, (sc+1)*3)]
 
-
-def solve_sudoku(board):
+def solve_sudoku(board, backtracks=0):
     """
     Given a sudoku board (as a list-of-lists of numbers, where 0 represents an
     empty square), return a solved version of the puzzle.
     """
-    pass
+    board = [row.copy() for row in board]
+
+    all_candidates = {}
+
+    for row in range(len(board)):
+        for col in range(len(board)):
+            if board[row][col] == 0:
+                candidates = set(values_in_row(board, row))
+                candidates |= set(values_in_column(board, col))
+                candidates |= set(values_in_subgrid(board, row // 3, col // 3))
+                candidates = set(range(1, 10)) - candidates
+                if len(candidates) == 0:
+                    return None, backtracks
+                elif len(candidates) == 1:
+                    board[row][col] = candidates.pop()
+                else:
+                    all_candidates[(row, col)] = candidates
+    
+    if len(all_candidates) == 0:
+        return board, backtracks
+
+    min_len = 10
+    min_key = None
+    for key in all_candidates:
+        candidates = all_candidates[key]
+        if min_len > len(candidates):
+            min_len = len(candidates)
+            min_key = key
+
+    row, col = min_key
+    candidates = all_candidates[(row, col)]
+    for val in candidates:
+        board[row][col] = val
+        res, backtracks = solve_sudoku(board, backtracks)
+        if res is not None:
+            return res, backtracks
+        backtracks +=1
+    return None, backtracks
+    
 
 
 grid1 = [[5,1,7,6,0,0,0,3,4],
@@ -78,12 +118,12 @@ grid3 = [[0,0,1,0,0,9,0,0,3],  # http://www.extremesudoku.info/sudoku.html
          [0,3,0,0,7,0,0,4,0],
          [2,0,0,3,0,0,9,0,0]]
 
-import time
-for grid in [grid1, grid2, grid3]:
+for grid in [grid1, grid2, grid3] + all_inputs:
     print(format_sudoku(grid))
     t = time.time()
-    res = solve_sudoku(grid)
+    res, backtracks = solve_sudoku(grid)
     elapsed = time.time() - t
     print(format_sudoku(res))
     print(elapsed, 'seconds')
+    print(backtracks, 'backtracks')
     print()
