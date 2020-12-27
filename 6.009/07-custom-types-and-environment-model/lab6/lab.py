@@ -18,7 +18,44 @@ def satisfying_assignment(formula):
     True
     >>> satisfying_assignment([[('a', True)], [('a', False)]])
     """
-    raise NotImplementedError
+    formula = formula.copy()
+    res = {}
+    i = 0
+    while i < len(formula):
+        clause = formula[i]
+        if len(clause) == 1:
+            var, lit = clause[0]
+            if var in res and res[var] != lit:
+                return None
+            res[var] = lit
+            formula.remove(clause)
+            continue
+        else:
+            skip = False
+            for var in clause:
+                var, lit = var
+                if var in res and res[var] == lit:
+                    formula.remove(clause)
+                    skip = True
+                    break
+            if skip:
+                continue
+            
+        i += 1
+    if len(formula) == 0:
+        return res
+
+    for clause in formula:
+        for var in clause:
+            var, lit = var
+            res[var] = lit
+            subres = satisfying_assignment([list(res.items())] + formula[:])
+            del res[var]
+
+            if subres is not None:
+                return subres
+        
+    return None
 
 
 def boolify_scheduling_problem(student_preferences, session_capacities):
