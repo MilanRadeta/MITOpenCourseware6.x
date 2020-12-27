@@ -6,7 +6,7 @@ sys.setrecursionlimit(10000)
 # NO ADDITIONAL IMPORTS
 
 
-def satisfying_assignment(formula):
+def satisfying_assignment(formula, res=None):
     """
     Find a satisfying assignment for a given CNF formula.
     Returns that assignment if one exists, or None otherwise.
@@ -18,8 +18,9 @@ def satisfying_assignment(formula):
     True
     >>> satisfying_assignment([[('a', True)], [('a', False)]])
     """
-    formula = formula.copy()
-    res = {}
+    formula = sorted(formula, key=lambda clause: len(clause))
+    if res is None:
+        res = {}
     i = 0
     while i < len(formula):
         clause = formula[i]
@@ -32,28 +33,32 @@ def satisfying_assignment(formula):
             continue
         else:
             skip = False
-            for var in clause:
-                var, lit = var
-                if var in res and res[var] == lit:
-                    formula.remove(clause)
+            for var, lit in clause:
+                if var in res:
+                    if res[var] == lit:
+                        formula.remove(clause)
+                    else:
+                        formula[i] = clause[:]
+                        formula[i].remove((var,lit))
                     skip = True
                     break
+                    
             if skip:
                 continue
             
         i += 1
     if len(formula) == 0:
-        return res
+        return {key: val for key, val in res.items() if val is not None}
 
     for clause in formula:
-        for var in clause:
-            var, lit = var
-            res[var] = lit
-            subres = satisfying_assignment([list(res.items())] + formula[:])
-            del res[var]
-
-            if subres is not None:
-                return subres
+        for var, lit in clause:
+            if var not in res:
+                for lit in (lit, not lit):
+                    res[var] = lit
+                    subres = satisfying_assignment(formula, res.copy())
+                    if subres is not None:
+                        return subres
+                res[var] = None
         
     return None
 
