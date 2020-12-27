@@ -5,6 +5,21 @@ import sys
 sys.setrecursionlimit(10000)
 # NO ADDITIONAL IMPORTS
 
+def subsets(lst, n): 
+      
+    if n == 0: 
+        return [[]] 
+      
+    l =[] 
+    for i in range(0, len(lst)): 
+          
+        m = lst[i] 
+        remLst = lst[i + 1:] 
+          
+        for p in subsets(remLst, n-1): 
+            l.append([m]+p) 
+              
+    return l
 
 def satisfying_assignment(formula, res=None):
     """
@@ -76,7 +91,26 @@ def boolify_scheduling_problem(student_preferences, session_capacities):
              lab write-up
     We assume no student or session names contain underscores.
     """
-    raise NotImplementedError
+    cnf = []
+
+    for student, rooms in student_preferences.items():
+        cnf += [[('%s_%s' % (student, room), True) for room in rooms]]
+        for room in rooms:
+            for other in rooms:
+                if other != room:
+                    cnf += [[('%s_%s' % (student, room), False), ('%s_%s' % (student, other), False)]]
+
+    for room, capacity in session_capacities.items():
+        students = [student for student, rooms in student_preferences.items() if room in rooms]
+        if capacity < len(students):
+            in_students_lists = subsets(students, capacity)
+            for l in in_students_lists:
+                for student in students:
+                    if student not in l:
+                        cnf += [[('%s_%s' % (s, room), False) for s in l] + [('%s_%s' % (student, room), False)]]
+                    
+
+    return cnf
 
 
 if __name__ == '__main__':
