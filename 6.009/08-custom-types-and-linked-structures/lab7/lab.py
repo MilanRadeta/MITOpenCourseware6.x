@@ -197,7 +197,28 @@ def word_filter(trie, pattern):
          ? matches any single character,
          otherwise char in pattern char must equal char in word.
     """
-    raise NotImplementedError
+    while '**' in pattern:
+        pattern = pattern.replace('**', '*')
+    if len(pattern) == 0:
+        return [] if trie.value is None else [('', trie.value)]
+
+    subtries = []
+    first = pattern[0]
+    if first == '?':
+        subtries = list(trie.children.items())
+    elif first == '*':
+        subtries = [('', trie)]
+        i = 0
+        while i < len(subtries):
+            key, subtrie = subtries[i]
+            subtries += [(key + subkey, val) for subkey, val in subtrie.children.items()]
+            i += 1
+    elif first in trie.children:
+        subtries = [(first, trie.children[first])]
+
+    pattern = pattern[1:]
+
+    return list({(key + subkey, freq) for key, sub in subtries for subkey, freq in word_filter(sub, pattern) })
 
 
 # you can include test cases of your own in the block below.
