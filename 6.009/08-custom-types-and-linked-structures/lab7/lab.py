@@ -35,7 +35,7 @@ class Trie:
         the trie, raise a KeyError.  If the given key is of the wrong type,
         raise a TypeError.
         """
-        if self.type != type(key):
+        if self.type is not None and self.type != type(key):
             raise TypeError(type(key))
 
         
@@ -55,7 +55,7 @@ class Trie:
         the trie, raise a KeyError.  If the given key is of the wrong type,
         raise a TypeError.
         """
-        if self.type != type(key):
+        if self.type is not None and self.type != type(key):
             raise TypeError(type(key))
         
         if key in self:
@@ -90,7 +90,13 @@ def make_word_trie(text):
     words in the text, and whose values are the number of times the associated
     word appears in the text
     """
-    raise NotImplementedError
+    trie = Trie()
+    for sentence in tokenize_sentences(text):
+        for word in sentence.split():
+            if word not in trie:
+                trie[word] = 0
+            trie[word] += 1
+    return trie
 
 
 def make_phrase_trie(text):
@@ -99,7 +105,13 @@ def make_phrase_trie(text):
     sentences in the text (as tuples of individual words) and whose values are
     the number of times the associated sentence appears in the text.
     """
-    raise NotImplementedError
+    trie = Trie()
+    for sentence in tokenize_sentences(text):
+        sentence = tuple(sentence.split())
+        if sentence not in trie:
+            trie[sentence] = 0
+        trie[sentence] += 1
+    return trie
 
 
 def autocomplete(trie, prefix, max_count=None):
@@ -111,7 +123,31 @@ def autocomplete(trie, prefix, max_count=None):
     Raise a TypeError if the given prefix is of an inappropriate type for the
     trie.
     """
-    raise NotImplementedError
+
+    if not isinstance(prefix, trie.type):
+        raise TypeError
+    
+    result = []
+    for i in range(len(prefix)):
+        l = prefix[i:i+1]
+        try:
+            trie = trie.children[l]
+        except:
+            return []
+
+    if trie.value is not None:
+        result.append((prefix, trie.value))
+    for key, val in trie:
+        result.append((prefix + key, val))
+
+    result.sort(key=lambda item: item[1], reverse=True)
+
+    result = [key for key, val in result]
+
+    if max_count is None:
+        return result
+    
+    return result[:max_count]
 
 
 def autocorrect(trie, prefix, max_count=None):
