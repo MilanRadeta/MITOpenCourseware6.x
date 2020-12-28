@@ -158,7 +158,35 @@ def autocorrect(trie, prefix, max_count=None):
     fewer than max_count elements, include the most-frequently-occurring valid
     edits of the given word as well, up to max_count total elements.
     """
-    raise NotImplementedError
+    res = autocomplete(trie, prefix, max_count)
+    if max_count is not None and len(res) >= max_count:
+        return res
+    
+    keys = set()
+    lower_letters = [chr(i) for i in range(ord('a'),ord('z')+1)]
+    for i in range(len(prefix) + 1):
+        for letter in lower_letters:
+            keys.add(prefix[:i] + letter + prefix[i:])
+            keys.add(prefix[:i] + letter + prefix[i+1:])
+        keys.add(prefix[:i] + prefix[i+1:])
+        if i < len(prefix) - 1:
+            keys.add(prefix[:i] + prefix[i+1] + prefix[i] + prefix[i+2:])
+
+    corrects = []
+    for key in keys:
+        if key not in res:
+            try:
+                corrects.append((key, trie[key]))
+            except:
+                pass
+
+    corrects.sort(key=lambda item: item[1], reverse=True)
+    res += [key for key, val in corrects]
+
+    if max_count is None:
+        return res
+    
+    return res[:max_count]
 
 
 def word_filter(trie, pattern):
