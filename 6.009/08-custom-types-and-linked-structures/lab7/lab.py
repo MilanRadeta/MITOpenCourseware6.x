@@ -4,7 +4,9 @@ from text_tokenize import tokenize_sentences
 
 class Trie:
     def __init__(self):
-        raise NotImplementedError
+        self.value = None
+        self.children = {}
+        self.type = None
 
 
     def __setitem__(self, key, value):
@@ -14,8 +16,18 @@ class Trie:
         immutable ordered sequence.  Raise a TypeError if the given key is of
         the wrong type.
         """
-        raise NotImplementedError
+        if not (isinstance(key, tuple) or isinstance(key, str)):
+            raise TypeError(type(key))
 
+        if self.type is None:
+            self.type = type(key)
+        elif self.type != type(key):
+            raise TypeError(type(key))
+
+        if len(key) > 0:
+            self.children.setdefault(key[0:1], Trie())[key[1:]] = value
+        else:
+            self.value = value
 
     def __getitem__(self, key):
         """
@@ -23,7 +35,19 @@ class Trie:
         the trie, raise a KeyError.  If the given key is of the wrong type,
         raise a TypeError.
         """
-        raise NotImplementedError
+        if self.type != type(key):
+            raise TypeError(type(key))
+
+        
+        if len(key) > 0:
+            try:
+                return self.children[key[0:1]][key[1:]]
+            except KeyError:
+                raise KeyError(key)
+        else:
+            if self.value is None:
+                raise KeyError(key)
+            return self.value
 
     def __delitem__(self, key):
         """
@@ -31,20 +55,33 @@ class Trie:
         the trie, raise a KeyError.  If the given key is of the wrong type,
         raise a TypeError.
         """
-        raise NotImplementedError
+        if self.type != type(key):
+            raise TypeError(type(key))
+        
+        if key in self:
+            self[key] = None
+        else:
+            raise KeyError(key)
 
     def __contains__(self, key):
         """
         Is key a key in the trie? return True or False.
         """
-        raise NotImplementedError
+        try:
+            return self[key] and True
+        except KeyError:
+            return False
 
     def __iter__(self):
         """
         Generator of (key, value) pairs for all keys/values in this trie and
         its children.  Must be a generator!
         """
-        raise NotImplementedError
+        for key, trie in self.children.items():
+            if trie.value is not None:
+                yield (key, trie.value)
+            for sub, val in trie:
+                yield (key + sub, val)
 
 
 def make_word_trie(text):
