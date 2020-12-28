@@ -223,4 +223,35 @@ def word_filter(trie, pattern):
 
 # you can include test cases of your own in the block below.
 if __name__ == '__main__':
-    pass
+    with open('books/alice.txt', encoding="utf-8") as f:
+        text = f.read()
+    trie  = make_phrase_trie(text)
+    print('Alice: 6 most common sentences:', autocomplete(trie, tuple(), 6))
+    print('Alice: distinct sentences:', len([sentence for sentence, freq in trie if freq == 1]))
+    print('Alice: total sentences:', len([sentence for sentence, freq in trie]))
+    trie  = make_word_trie(text)
+    print('Alice: 12 autocorrections for hear:', autocorrect(trie, 'hear', 12))
+    
+    with open('books/meta.txt', encoding="utf-8") as f:
+        text = f.read()
+    trie = make_word_trie(text)
+    print('Metamorphosis: 6 most common gre* words:', autocomplete(trie, 'gre', 6))
+    print('Metamorphosis: c*h filter', word_filter(trie, 'c*h'))
+
+    with open('books/2cities.txt', encoding="utf-8") as f:
+        text = f.read()
+    trie = make_word_trie(text)
+    print('Two Cities: r?c*t filter', word_filter(trie, 'r?c*t'))
+
+    with open('books/pride.txt', encoding="utf-8") as f:
+        text = f.read()
+    trie  = make_word_trie(text)
+    print('Pride: autocorrections for hear:', autocorrect(trie, 'hear'))
+
+    with open('books/dracula.txt', encoding="utf-8") as f:
+        text = f.read()
+    trie  = make_word_trie(text)
+    print('Dracula: distinct words:', len([word for word, freq in trie if freq == 1]))
+    print('Dracula: total words:', len([word for word, freq in trie]))
+    
+
