@@ -78,6 +78,8 @@ class BinOp(Symbol):
         self.priority = priority
         self.left = BinOp.process_operands(left)
         self.right = BinOp.process_operands(right)
+        self.simple_left = self.left.simplify()
+        self.simple_right = self.right.simplify()
 
     @staticmethod
     def process_operands(operand):
@@ -113,14 +115,16 @@ class BinOp(Symbol):
         return '%s(%s, %s)' % (self.__class__.__name__, repr(self.left), repr(self.right))
 
     def has_two_number_operands(self):
-        return isinstance(self.left, Num) and isinstance(self.right, Num)
+        return isinstance(self.simple_left, Num) and isinstance(self.simple_right, Num)
 
     def check_value(self, val, is_commutative=True, is_zero_check=False):
-        if (is_zero_check or is_commutative) and isinstance(self.left, Num) and self.left.n == val:
-            return Num(0) if is_zero_check else self.right
-        if isinstance(self.right, Num) and self.right.n == val:
-            return Num(0) if is_zero_check else self.left
-        return None if is_zero_check else self
+        left = self.simple_left
+        right = self.simple_right
+        if (is_zero_check or is_commutative) and isinstance(left, Num) and left.n == val:
+            return Num(0) if is_zero_check else right
+        if isinstance(right, Num) and right.n == val:
+            return Num(0) if is_zero_check else left
+        return None if is_zero_check else self.__class__(left, right)
 
 
 class Add(BinOp):
@@ -132,19 +136,16 @@ class Add(BinOp):
 
     def simplify (self):
         if self.has_two_number_operands():
-            return Num(self.left.n + self.right.n)
+            return Num(self.simple_left.n + self.simple_right.n)
         return self.check_value(0)
 
 class Sub(BinOp):
     def __init__(self, left, right):
         super().__init__('-', left, right, 2)
 
-    def deriv(self, var):
-        raise NotImplementedError
-
     def simplify (self):
         if self.has_two_number_operands():
-            return Num(self.left.n - self.right.n)
+            return Num(self.simple_left.n - self.simple_right.n)
         return self.check_value(0, False)
     
 
@@ -157,7 +158,7 @@ class Mul(BinOp):
 
     def simplify (self):
         if self.has_two_number_operands():
-            return Num(self.left.n * self.right.n)
+            return Num(self.simple_left.n * self.simple_right.n)
         return self.check_value(0, is_zero_check=True) or self.check_value(1)
 
 class Div(BinOp):
@@ -169,7 +170,7 @@ class Div(BinOp):
 
     def simplify (self):
         if self.has_two_number_operands():
-            return Num(self.left.n / self.right.n)
+            return Num(self.simple_left.n / self.simple_right.n)
         return self.check_value(0, is_zero_check=True) or self.check_value(1, False)
     
 
