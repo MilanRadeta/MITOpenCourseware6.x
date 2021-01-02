@@ -28,6 +28,9 @@ class Symbol:
 
     def simplify (self):
         return self
+    
+    def eval(self, mapping):
+        raise NotImplementedError
 
 
 
@@ -49,6 +52,9 @@ class Var(Symbol):
         if var != self.name:
             return Num(0)
         return Num(1)
+    
+    def eval(self, mapping):
+        return mapping.get(self.name, self)
 
 
 class Num(Symbol):
@@ -67,6 +73,9 @@ class Num(Symbol):
 
     def deriv(self, var):
         return Num(0)
+    
+    def eval(self, mapping):
+        return self.n
 
 class BinOp(Symbol):
     def __init__(self, operator, left, right, priority=1):
@@ -138,6 +147,9 @@ class Add(BinOp):
         if self.has_two_number_operands():
             return Num(self.simple_left.n + self.simple_right.n)
         return self.check_value(0)
+    
+    def eval(self, mapping):
+        return self.simple_left.eval(mapping) + self.simple_right.eval(mapping)
 
 class Sub(BinOp):
     def __init__(self, left, right):
@@ -147,6 +159,9 @@ class Sub(BinOp):
         if self.has_two_number_operands():
             return Num(self.simple_left.n - self.simple_right.n)
         return self.check_value(0, False)
+    
+    def eval(self, mapping):
+        return self.simple_left.eval(mapping) - self.simple_right.eval(mapping)
     
 
 class Mul(BinOp):
@@ -160,6 +175,9 @@ class Mul(BinOp):
         if self.has_two_number_operands():
             return Num(self.simple_left.n * self.simple_right.n)
         return self.check_value(0, is_zero_check=True) or self.check_value(1)
+    
+    def eval(self, mapping):
+        return self.simple_left.eval(mapping) * self.simple_right.eval(mapping)
 
 class Div(BinOp):
     def __init__(self, left, right):
@@ -172,6 +190,9 @@ class Div(BinOp):
         if self.has_two_number_operands():
             return Num(self.simple_left.n / self.simple_right.n)
         return self.check_value(0, is_zero_check=True) or self.check_value(1, False)
+    
+    def eval(self, mapping):
+        return self.simple_left.eval(mapping) / self.simple_right.eval(mapping)
     
 
 
