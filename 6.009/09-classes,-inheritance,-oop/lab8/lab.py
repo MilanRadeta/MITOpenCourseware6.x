@@ -6,7 +6,22 @@ import doctest
 
 
 class Symbol:
-    pass
+    def __add__(self, other):
+        return Add(self, other)
+    def __radd__(self, other):
+        return Add(other, self)
+    def __sub__(self, other):
+        return Sub(self, other)
+    def __rsub__(self, other):
+        return Sub(other, self)
+    def __mul__(self, other):
+        return Mul(self, other)
+    def __rmul__(self, other):
+        return Mul(other, self)
+    def __truediv__(self, other):
+        return Div(self, other)
+    def __rtruediv__(self, other):
+        return Div(other, self)
 
 
 class Var(Symbol):
