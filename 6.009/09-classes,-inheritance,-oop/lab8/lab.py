@@ -47,8 +47,8 @@ class Var(Symbol):
 
     def deriv(self, var):
         if var != self.name:
-            return 0
-        return 1
+            return Num(0)
+        return Num(1)
 
 
 class Num(Symbol):
@@ -66,16 +66,16 @@ class Num(Symbol):
         return 'Num(' + repr(self.n) + ')'
 
     def deriv(self, var):
-        return 0
+        return Num(0)
 
 class BinOp(Symbol):
-    def __init__(self, operator, left, right, precedence=1):
+    def __init__(self, operator, left, right, priority=1):
         """
         Initializer.  Store an instance variable called `operator`, containing the
         binary operator symbol, and `left` and `right` operands.
         """
         self.operator = operator
-        self.precedence = precedence
+        self.priority = priority
         self.left = BinOp.process_operands(left)
         self.right = BinOp.process_operands(right)
 
@@ -90,15 +90,16 @@ class BinOp(Symbol):
             return Num(operand)
         if not isinstance(operand, Symbol):
             raise TypeError
+        return operand
 
     def parenthesize_operands(self, operand, check_same_precedence=False):
         """
         Parenthesize operands if needed by checking their precedence
         """
         if isinstance(operand, BinOp):
-            if operand.precedence < self.precedence:
+            if operand.priority > self.priority:
                 return '(%s)' % operand
-            if check_same_precedence and type(self) in (Div, Sub) and operand.precedence == self.precedence:
+            if check_same_precedence and type(self) in (Div, Sub) and operand.priority == self.priority:
                 return '(%s)' % operand
         return operand
         
@@ -109,17 +110,17 @@ class BinOp(Symbol):
         return '%s %s %s' % (left, self.operator, right)
 
     def __repr__(self):
-        return 'BinOp(%s, %s, %s)' % (self.operator, repr(self.left), repr(self.right))
+        return '%s(%s, %s)' % (self.__class__.__name__, repr(self.left), repr(self.right))
 
     def has_two_number_operands(self):
-        return isinstance(self.left, Num) and isinstance(self.right)
+        return isinstance(self.left, Num) and isinstance(self.right, Num)
 
-    def check_value(self, val, is_commutative=True, return_zero=False):
-        if is_commutative and isinstance(self.left, Num) and self.left.n == val:
-            return 0 if return_zero else self.right
+    def check_value(self, val, is_commutative=True, is_zero_check=False):
+        if (is_zero_check or is_commutative) and isinstance(self.left, Num) and self.left.n == val:
+            return Num(0) if is_zero_check else self.right
         if isinstance(self.right, Num) and self.right.n == val:
-            return 0 if return_zero else self.left
-        return None if return_zero else self
+            return Num(0) if is_zero_check else self.left
+        return None if is_zero_check else self
 
 
 class Add(BinOp):
@@ -127,7 +128,7 @@ class Add(BinOp):
         super().__init__('+', left, right, 2)
 
     def deriv(self, var):
-        return self.left.deriv(var) + self.right.deriv(var)
+        return Add(self.left.deriv(var), self.right.deriv(var))
 
     def simplify (self):
         if self.has_two_number_operands():
@@ -152,24 +153,24 @@ class Mul(BinOp):
         super().__init__('*', left, right)
 
     def deriv(self, var):
-        return self.left * self.right.deriv(var) + self.right * self.left.deriv(var)
+        return Add(Mul(self.left, self.right.deriv(var)), Mul(self.right, self.left.deriv(var)))
 
     def simplify (self):
         if self.has_two_number_operands():
             return Num(self.left.n * self.right.n)
-        return self.check_value(0, return_zero=True) or self.check_value(1)
+        return self.check_value(0, is_zero_check=True) or self.check_value(1)
 
 class Div(BinOp):
     def __init__(self, left, right):
         super().__init__('/', left, right)
 
     def deriv(self, var):
-        return (self.right * self.left.deriv(var) - self.left * self.right.deriv(var)) / (self.right * self.right)
+        return Div(Sub(Mul(self.right, self.left.deriv(var)), Mul(self.left, self.right.deriv(var))), Mul(self.right, self.right))
 
     def simplify (self):
         if self.has_two_number_operands():
             return Num(self.left.n / self.right.n)
-        return self.check_value(0, is_commutative=False, return_zero=True) or self.check_value(1, False)
+        return self.check_value(0, is_zero_check=True) or self.check_value(1, False)
     
 
 
