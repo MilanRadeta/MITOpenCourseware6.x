@@ -23,6 +23,10 @@ class Symbol:
     def __rtruediv__(self, other):
         return Div(other, self)
 
+    def deriv(self, var):
+        raise NotImplementedError
+
+
 
 class Var(Symbol):
     def __init__(self, n):
@@ -38,6 +42,11 @@ class Var(Symbol):
     def __repr__(self):
         return 'Var(' + repr(self.name) + ')'
 
+    def deriv(self, var):
+        if var != self.name:
+            return 0
+        return 1
+
 
 class Num(Symbol):
     def __init__(self, n):
@@ -52,6 +61,9 @@ class Num(Symbol):
 
     def __repr__(self):
         return 'Num(' + repr(self.n) + ')'
+
+    def deriv(self, var):
+        return 0
 
 class BinOp(Symbol):
     def __init__(self, operator, left, right, precedence=1):
@@ -100,17 +112,30 @@ class Add(BinOp):
     def __init__(self, left, right):
         super().__init__('+', left, right, 2)
 
+    def deriv(self, var):
+        return self.left.deriv(var) + self.right.deriv(var)
+
 class Sub(BinOp):
     def __init__(self, left, right):
         super().__init__('-', left, right, 2)
+
+    def deriv(self, var):
+        raise NotImplementedError
+    
 
 class Mul(BinOp):
     def __init__(self, left, right):
         super().__init__('*', left, right)
 
+    def deriv(self, var):
+        return self.left * self.right.deriv(var) + self.right * self.left.deriv(var)
+
 class Div(BinOp):
     def __init__(self, left, right):
         super().__init__('/', left, right)
+
+    def deriv(self, var):
+        return (self.right * self.left.deriv(var) - self.left * self.right.deriv(var)) / (self.right * self.right)
     
 
 
