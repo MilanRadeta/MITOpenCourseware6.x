@@ -26,6 +26,9 @@ class Symbol:
     def deriv(self, var):
         raise NotImplementedError
 
+    def simplify (self):
+        return self
+
 
 
 class Var(Symbol):
@@ -108,6 +111,17 @@ class BinOp(Symbol):
     def __repr__(self):
         return 'BinOp(%s, %s, %s)' % (self.operator, repr(self.left), repr(self.right))
 
+    def has_two_number_operands(self):
+        return isinstance(self.left, Num) and isinstance(self.right)
+
+    def check_value(self, val, is_commutative=True, return_zero=False):
+        if is_commutative and isinstance(self.left, Num) and self.left.n == val:
+            return 0 if return_zero else self.right
+        if isinstance(self.right, Num) and self.right.n == val:
+            return 0 if return_zero else self.left
+        return None if return_zero else self
+
+
 class Add(BinOp):
     def __init__(self, left, right):
         super().__init__('+', left, right, 2)
@@ -115,12 +129,22 @@ class Add(BinOp):
     def deriv(self, var):
         return self.left.deriv(var) + self.right.deriv(var)
 
+    def simplify (self):
+        if self.has_two_number_operands():
+            return Num(self.left.n + self.right.n)
+        return self.check_value(0)
+
 class Sub(BinOp):
     def __init__(self, left, right):
         super().__init__('-', left, right, 2)
 
     def deriv(self, var):
         raise NotImplementedError
+
+    def simplify (self):
+        if self.has_two_number_operands():
+            return Num(self.left.n - self.right.n)
+        return self.check_value(0, False)
     
 
 class Mul(BinOp):
@@ -130,12 +154,22 @@ class Mul(BinOp):
     def deriv(self, var):
         return self.left * self.right.deriv(var) + self.right * self.left.deriv(var)
 
+    def simplify (self):
+        if self.has_two_number_operands():
+            return Num(self.left.n * self.right.n)
+        return self.check_value(0, return_zero=True) or self.check_value(1)
+
 class Div(BinOp):
     def __init__(self, left, right):
         super().__init__('/', left, right)
 
     def deriv(self, var):
         return (self.right * self.left.deriv(var) - self.left * self.right.deriv(var)) / (self.right * self.right)
+
+    def simplify (self):
+        if self.has_two_number_operands():
+            return Num(self.left.n / self.right.n)
+        return self.check_value(0, is_commutative=False, return_zero=True) or self.check_value(1, False)
     
 
 
