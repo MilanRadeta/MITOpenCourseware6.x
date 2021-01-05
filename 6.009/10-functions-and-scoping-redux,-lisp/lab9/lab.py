@@ -54,7 +54,28 @@ def tokenize(source):
         source (str): a string containing the source code of a Snek
                       expression
     """
-    raise NotImplementedError
+    res = []
+    last_val = ''
+    skip = False
+
+    for char in source:
+        if char in '(); \n' and last_val:
+            res.append(last_val)
+            last_val = ''
+        if char == ';':
+            skip = True
+        elif char == '\n':
+            skip = False
+        elif skip or char == ' ':
+            continue
+        elif char in '()':
+            res.append(char)
+        else:
+            last_val += char
+    if last_val:
+        res.append(last_val)
+
+    return res
 
 
 def parse(tokens):
