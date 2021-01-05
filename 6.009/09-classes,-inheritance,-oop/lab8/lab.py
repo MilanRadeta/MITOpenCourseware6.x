@@ -194,6 +194,76 @@ class Div(BinOp):
     def eval(self, mapping):
         return self.simple_left.eval(mapping) / self.simple_right.eval(mapping)
     
+def tokenize(input):
+    res = []
+    last_val = ''
+    input = input.strip()
+    if input[0] != '(':
+        input = '(' + input + ')'
+
+    def parse_val():
+        try:
+            res.append(int(last_val))
+        except:
+            try:
+                res.append(float(last_val))
+            except:
+                res.append(last_val)
+
+    for char in input:
+        if char == ' ':
+            continue
+        if char in ('(',')','*','/'):
+            if last_val:
+                parse_val()
+                last_val = ''
+            res.append(char)
+        elif char in ('+', '-'):
+            if last_val:
+                parse_val()
+                res.append(char)
+                last_val = ''
+            elif len(res) == 0 or res[-1] in ('(', '*', '/', '+', '-'):
+                last_val += char
+            else:
+                res.append(char)
+        else:
+            last_val += char
+    if last_val:
+        parse_val()
+            
+
+    return res
+
+def parse(tokens):
+    token_ops = {
+        '+': Add,
+        '-': Sub,
+        '*': Mul,
+        '/': Div,
+    }
+    
+    def parse_expression(index):
+        token = tokens[index]
+        if token == '(':
+            left, next_index = parse_expression(index + 1)
+            if next_index + 1 < len(tokens):
+                op = tokens[next_index]
+                right, next_index = parse_expression(next_index + 1)
+                return token_ops[op](left, right), next_index + 1
+            return left, next_index + 1
+        else:
+            try:
+                if token > 0 or token <= 0:
+                    return Num(token), index +1
+            except:
+                pass
+            return Var(token), index + 1
+    parsed_expression, next_index = parse_expression(0)
+    return parsed_expression
+
+def sym(exp):
+    return parse(tokenize(exp))
 
 
 if __name__ == '__main__':
