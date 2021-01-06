@@ -88,7 +88,42 @@ def parse(tokens):
     Arguments:
         tokens (list): a list of strings representing tokens
     """
-    raise NotImplementedError
+    if len(tokens) == 1:
+        token = tokens[0]
+        if token in '()':
+            raise SnekSyntaxError
+        try:
+            return float(token) if '.' in token else int(token)
+        except:
+            return token
+        
+    if tokens[0] != '(' or tokens[-1] != ')':
+        raise SnekSyntaxError
+    
+    res = []
+    nested = []
+    current = res
+    i = 1
+    while i < len(tokens) - 1:
+        token = tokens[i]
+        if token == '(':
+            nested.append([])
+            current = nested[-1]
+        elif token == ')':
+            if len(nested) > 0:
+                val = nested.pop()
+                current = nested[-1] if len(nested) > 0 else res
+                current.append(val)
+            else:
+                raise SnekSyntaxError
+        else:
+            try:
+                val = float(token) if '.' in token else int(token)
+            except:
+                val = token
+            current.append(val)
+        i += 1
+    return res
 
 
 ######################
