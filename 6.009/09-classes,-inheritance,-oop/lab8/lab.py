@@ -203,12 +203,12 @@ def tokenize(input):
 
     def parse_val():
         try:
-            res.append(int(last_val))
-        except:
-            try:
+            if '.' in last_val:
                 res.append(float(last_val))
-            except:
-                res.append(last_val)
+            else:
+                res.append(int(last_val))
+        except:
+            res.append(last_val)
 
     for char in input:
         if char == ' ':
