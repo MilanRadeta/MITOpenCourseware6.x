@@ -130,10 +130,30 @@ def parse(tokens):
 # Built-in Functions #
 ######################
 
+def mul(args):
+    res = 1
+    for arg in args:
+        res *= arg
+    return res
+
+def div(args):
+    if len(args) == 0:
+        raise SnekEvaluationError
+    if len(args) == 1:
+        return 1 / args[0]
+    
+    res = args[0] / args[1]
+
+    for arg in args[2:]:
+        res /= arg
+    return res
 
 snek_builtins = {
     '+': sum,
     '-': lambda args: -args[0] if len(args) == 1 else (args[0] - sum(args[1:])),
+    '*': mul,
+    '/': div,
+
 }
 
 
