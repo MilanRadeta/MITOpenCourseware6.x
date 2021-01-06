@@ -151,7 +151,17 @@ def evaluate(tree):
         tree (type varies): a fully parsed expression, as the output from the
                             parse function
     """
-    raise NotImplementedError
+    if isinstance(tree, str) and tree in snek_builtins:
+        return snek_builtins[tree]
+    if type(tree) in (int, float):
+        return tree
+    if isinstance(tree, list):
+        fun = tree[0]
+        if fun not in snek_builtins:
+            raise SnekEvaluationError
+        args = [evaluate(arg) for arg in tree[1:]]
+        return snek_builtins[fun](args)
+    raise SnekNameError
 
 
 if __name__ == '__main__':
@@ -161,4 +171,11 @@ if __name__ == '__main__':
     # uncommenting the following line will run doctests from above
     # doctest.testmod()
 
-    pass
+    while True:
+        inp = input('in> ')
+        if inp == 'QUIT':
+            break
+        try:
+            print('  out>', evaluate(parse(tokenize(inp))))
+        except Exception as e:
+            print('  out>', e)
