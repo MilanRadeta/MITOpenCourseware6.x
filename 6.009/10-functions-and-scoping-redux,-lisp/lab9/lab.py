@@ -78,6 +78,35 @@ def tokenize(source):
     return res
 
 
+def validate_token(tokens, i):
+    val = tokens[i]
+    if val == 'define':
+        name = tokens[i+1]
+        expr = tokens[i+2]
+        try: 
+            int(name)
+            raise SnekSyntaxError
+        except:
+            if expr in snek_builtins or expr == ')':
+                raise SnekSyntaxError
+
+    if val == 'lambda':
+        i += 1
+        if tokens[i] != '(':
+            raise SnekSyntaxError
+        i += 1
+        while True:
+            val = tokens[i]
+            if type(val) in (int, float):
+                raise SnekSyntaxError
+            if val == ')':
+                break
+        i += 1
+        val = tokens[i]
+        if val in '/*-+)':
+            raise SnekSyntaxError
+    return True
+
 def parse(tokens):
     """
     Parses a list of tokens, constructing a representation where:
@@ -121,15 +150,10 @@ def parse(tokens):
                 val = float(token) if '.' in token else int(token)
             except:
                 val = token
-                if val == 'define':
-                    name = tokens[i+1]
-                    expr = tokens[i+2]
-                    try: 
-                        int(name)
-                        raise SnekSyntaxError
-                    except:
-                        if expr in snek_builtins or expr == ')':
-                            raise SnekSyntaxError
+                try:
+                    validate_token(tokens, i)
+                except:
+                    raise SnekSyntaxError
             current.append(val)
         i += 1
     return res
@@ -188,14 +212,24 @@ def evaluate(tree, env=None):
         return tree
     if isinstance(tree, list):
         fun = tree[0]
+        if isinstance(fun, list):
+            fun = evaluate(fun, env)
+
         if fun == 'define':
             env[tree[1]] = evaluate(tree[2], env)
             return env[tree[1]]
+        if fun == 'lambda':
+            return UserDefinedFun(env, tree[1], tree[2])
+        if isinstance(fun, str):
+            if fun not in env:
+                raise SnekEvaluationError
+            fun = env[fun]
 
-        if fun not in env:
-            raise SnekEvaluationError
         args = [evaluate(arg, env) for arg in tree[1:]]
-        return env[fun](args)
+        try:
+            return fun(args)
+        except:
+            raise SnekEvaluationError
     raise SnekNameError
 
 
@@ -226,6 +260,21 @@ def result_and_env(tree, env=None):
     if env is None:
         env = Environment(BuiltInsEnv)
     return evaluate(tree, env), env
+
+class UserDefinedFun():
+    def __init__(self, env, args, expr):
+        self.env = env
+        self.args = args
+        self.expr = expr
+
+    def __call__(self, *args, **kwargs):
+        args = args[0]
+        if len(self.args) != len(args):
+            raise SnekEvaluationError
+        env = Environment(self.env)
+        for i in range(len(self.args)):
+            env[self.args[i]] = args[i]
+        return evaluate(self.expr, env)
 
 if __name__ == '__main__':
     # code in this block will only be executed if lab.py is the main file being
