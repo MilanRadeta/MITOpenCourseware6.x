@@ -121,6 +121,15 @@ def parse(tokens):
                 val = float(token) if '.' in token else int(token)
             except:
                 val = token
+                if val == 'define':
+                    name = tokens[i+1]
+                    expr = tokens[i+2]
+                    try: 
+                        int(name)
+                        raise SnekSyntaxError
+                    except:
+                        if expr in snek_builtins or expr == ')':
+                            raise SnekSyntaxError
             current.append(val)
         i += 1
     return res
@@ -162,7 +171,7 @@ snek_builtins = {
 ##############
 
 
-def evaluate(tree):
+def evaluate(tree, env=None):
     """
     Evaluate the given syntax tree according to the rules of the Snek
     language.
@@ -171,18 +180,52 @@ def evaluate(tree):
         tree (type varies): a fully parsed expression, as the output from the
                             parse function
     """
-    if isinstance(tree, str) and tree in snek_builtins:
-        return snek_builtins[tree]
+    if env is None:
+        env = Environment(BuiltInsEnv)
+    if isinstance(tree, str) and tree in env:
+        return env[tree]
     if type(tree) in (int, float):
         return tree
     if isinstance(tree, list):
         fun = tree[0]
-        if fun not in snek_builtins:
+        if fun == 'define':
+            env[tree[1]] = evaluate(tree[2], env)
+            return env[tree[1]]
+
+        if fun not in env:
             raise SnekEvaluationError
-        args = [evaluate(arg) for arg in tree[1:]]
-        return snek_builtins[fun](args)
+        args = [evaluate(arg, env) for arg in tree[1:]]
+        return env[fun](args)
     raise SnekNameError
 
+
+class Environment():
+    def __init__(self, parent=None, vars=None):
+        self.parent = parent
+        self.vars = {} if vars is None else vars
+    
+    def __contains__(self, name: str):
+        try:
+            return self[name] and True
+        except SnekNameError:
+            return False
+
+    def __getitem__(self, name: str):
+        if name in self.vars:
+            return self.vars[name]
+        if self.parent is not None:
+            return self.parent[name]
+        raise SnekNameError
+    
+    def __setitem__(self, name: str, value):
+        self.vars[name] = value
+
+BuiltInsEnv = Environment(None, snek_builtins)
+
+def result_and_env(tree, env=None):
+    if env is None:
+        env = Environment(BuiltInsEnv)
+    return evaluate(tree, env), env
 
 if __name__ == '__main__':
     # code in this block will only be executed if lab.py is the main file being
