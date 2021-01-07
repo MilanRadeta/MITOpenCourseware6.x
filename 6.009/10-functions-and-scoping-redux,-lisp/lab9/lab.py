@@ -234,11 +234,13 @@ if __name__ == '__main__':
     # uncommenting the following line will run doctests from above
     # doctest.testmod()
 
+    env = None
     while True:
         inp = input('in> ')
         if inp == 'QUIT':
             break
         try:
-            print('  out>', evaluate(parse(tokenize(inp))))
+            val, env = result_and_env(parse(tokenize(inp)), env)
+            print('  out>', val)
         except Exception as e:
             print('  out>', e)
