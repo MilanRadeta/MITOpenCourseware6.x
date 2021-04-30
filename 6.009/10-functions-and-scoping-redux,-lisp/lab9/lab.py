@@ -78,33 +78,34 @@ def tokenize(source):
     return res
 
 
-def validate_token(tokens, i):
-    val = tokens[i]
-    if val == 'define':
-        name = tokens[i+1]
-        expr = tokens[i+2]
-        try: 
-            int(name)
-            raise SnekSyntaxError
-        except:
-            if expr in snek_builtins or expr == ')':
-                raise SnekSyntaxError
+def validate_token(tree):
+    if (len(tree) == 0):
+        return
+    if tree[0] == 'define':
+        if (len(tree) != 3):
+            raise SnekSyntaxError('Invalid definition')
 
-    if val == 'lambda':
-        i += 1
-        if tokens[i] != '(':
-            raise SnekSyntaxError
-        i += 1
-        while True:
-            val = tokens[i]
-            if type(val) in (int, float):
-                raise SnekSyntaxError
-            if val == ')':
-                break
-            i += 1
-        val = tokens[i]
-        if type(val) in (int, float):
-            raise SnekSyntaxError
+        if isinstance(tree[1], list):
+            if (len(tree[1]) == 0):
+                raise SnekSyntaxError('Empty body')
+
+            tree[2] = ['lambda', tree[1][1:], tree[2]]
+            validate_token(tree[2])
+            tree[1] = tree[1][0]
+        name = tree[1]
+        if type(name) in (int, float):
+            raise SnekSyntaxError(name)
+
+    if tree[0] == 'lambda':
+        if (len(tree) != 3):
+            raise SnekSyntaxError('Invalid lambda definition')
+        params = tree[1]
+        
+        if not isinstance(params, list):
+            raise SnekSyntaxError('Missing lambda parameters parenthesis')
+        for arg in params:
+            if type(arg) in (int, float):
+                raise SnekSyntaxError(arg)
     return True
 
 def parse(tokens):
@@ -120,14 +121,16 @@ def parse(tokens):
     if len(tokens) == 1:
         token = tokens[0]
         if token in '()':
-            raise SnekSyntaxError
+            raise SnekSyntaxError('Unneccessary parenthesis ' + token)
         try:
             return float(token) if '.' in token else int(token)
         except:
             return token
         
-    if tokens[0] != '(' or tokens[-1] != ')':
-        raise SnekSyntaxError
+    if tokens[0] != '(':
+        raise SnekSyntaxError('Missing opening parenthesis')
+    if tokens[-1] != ')':
+        raise SnekSyntaxError('Missing closing parenthesis')
     
     res = []
     nested = []
@@ -139,23 +142,20 @@ def parse(tokens):
             nested.append([])
             current = nested[-1]
         elif token == ')':
-            if len(nested) > 0:
-                val = nested.pop()
-                current = nested[-1] if len(nested) > 0 else res
-                current.append(val)
-            else:
-                raise SnekSyntaxError
+            if (len(nested) == 0):
+                raise SnekSyntaxError('Missing opening parenthesis')
+            val = nested.pop()
+            validate_token(val)
+            current = nested[-1] if len(nested) > 0 else res
+            current.append(val)
         else:
             try:
                 val = float(token) if '.' in token else int(token)
             except:
                 val = token
-                try:
-                    validate_token(tokens, i)
-                except:
-                    raise SnekSyntaxError
             current.append(val)
         i += 1
+    validate_token(current)
     return res
 
 
@@ -171,7 +171,7 @@ def mul(args):
 
 def div(args):
     if len(args) == 0:
-        raise SnekEvaluationError
+        raise SnekEvaluationError('Empty args')
     if len(args) == 1:
         return 1 / args[0]
     
@@ -216,24 +216,23 @@ def evaluate(tree, env=None):
             fun = evaluate(fun, env)
 
         if fun == 'define':
-            if isinstance(tree[1], list):
-                tree[2] = ['lambda', tree[1][1:], tree[2]]
-                tree[1] = tree[1][0]
             env[tree[1]] = evaluate(tree[2], env)
             return env[tree[1]]
         if fun == 'lambda':
             return UserDefinedFun(env, tree[1], tree[2])
         if isinstance(fun, str):
             if fun not in env:
-                raise SnekEvaluationError
+                raise SnekEvaluationError('Unknown function ' + fun)
             fun = env[fun]
 
         args = [evaluate(arg, env) for arg in tree[1:]]
         try:
             return fun(args)
-        except:
-            raise SnekEvaluationError
-    raise SnekNameError
+        except Exception as e:
+            if type(e) in [SnekSyntaxError, SnekNameError, SnekEvaluationError]:
+                raise e
+            raise SnekEvaluationError(tree)
+    raise SnekNameError(tree[0])
 
 
 class Environment():
@@ -252,7 +251,7 @@ class Environment():
             return self.vars[name]
         if self.parent is not None:
             return self.parent[name]
-        raise SnekNameError
+        raise SnekNameError(name)
     
     def __setitem__(self, name: str, value):
         self.vars[name] = value
@@ -295,4 +294,4 @@ if __name__ == '__main__':
             val, env = result_and_env(parse(tokenize(inp)), env)
             print('  out>', val)
         except Exception as e:
-            print('  out>', type(e).__name__)
+            print('  out>', type(e).__name__, e.args)
