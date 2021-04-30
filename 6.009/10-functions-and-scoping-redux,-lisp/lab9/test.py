@@ -29,9 +29,9 @@ def load_test_values(n):
     """
     Helper function to load test inputs/outputs
     """
-    with open('test_inputs/%02d.json' % n) as f:
+    with open(os.path.join(TEST_DIRECTORY, 'test_inputs/%02d.json' % n) ) as f:
         inputs = json.load(f)
-    with open('test_outputs/%02d.json' % n) as f:
+    with open(os.path.join(TEST_DIRECTORY, 'test_outputs/%02d.json' % n) ) as f:
         outputs = json.load(f)
     return inputs, outputs
 
@@ -91,7 +91,7 @@ def do_raw_continued_evaluations(n):
     Test that the results from running continued evaluations in the same
     environment match the expected values.
     """
-    with open('test_outputs/%02d.json' % n) as f:
+    with open(os.path.join(TEST_DIRECTORY, 'test_outputs/%02d.json' % n) ) as f:
         expected = json.load(f)
     env = None
     results = []
@@ -99,7 +99,7 @@ def do_raw_continued_evaluations(n):
         t = make_tester(lab.result_and_env)
     except:
         t = make_tester(lab.evaluate)
-    with open('test_inputs/%02d.snek' % n) as f:
+    with open(os.path.join(TEST_DIRECTORY, 'test_inputs/%02d.snek' % n) ) as f:
         for line in iter(f.readline, ''):
             try:
                 parsed = lab.parse(lab.tokenize(line.strip()))
@@ -131,11 +131,11 @@ def run_test_number(n, func):
 def message(n):
     msg = "\nfor test_inputs/"+str(n)+".json"
     try:
-        with open('snek_code/%02d.snek' % n) as f:
+        with open(os.path.join(TEST_DIRECTORY, 'snek_code/%02d.snek' % n) ) as f:
             code = f.read()
         msg += " and snek_code/"+str(n)+".snek"
     except Exception as e:
-        with open('test_inputs/%02d.json' % n) as f:
+        with open(os.path.join(TEST_DIRECTORY, 'test_inputs/%02d.json' % n) ) as f:
             code = str(json.load(f))
     msg += " that begins with\n"
     msg += code if len(code) < 80 else code[:80]+'...'
