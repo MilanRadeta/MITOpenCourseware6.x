@@ -101,9 +101,9 @@ def validate_token(tokens, i):
                 raise SnekSyntaxError
             if val == ')':
                 break
-        i += 1
+            i += 1
         val = tokens[i]
-        if val in '/*-+)':
+        if type(val) in (int, float):
             raise SnekSyntaxError
     return True
 
@@ -295,4 +295,4 @@ if __name__ == '__main__':
             val, env = result_and_env(parse(tokenize(inp)), env)
             print('  out>', val)
         except Exception as e:
-            print('  out>', e)
+            print('  out>', type(e).__name__)
