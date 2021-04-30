@@ -216,6 +216,9 @@ def evaluate(tree, env=None):
             fun = evaluate(fun, env)
 
         if fun == 'define':
+            if isinstance(tree[1], list):
+                tree[2] = ['lambda', tree[1][1:], tree[2]]
+                tree[1] = tree[1][0]
             env[tree[1]] = evaluate(tree[2], env)
             return env[tree[1]]
         if fun == 'lambda':
